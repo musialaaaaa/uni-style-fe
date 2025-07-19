@@ -1,0 +1,114 @@
+/* Dark Theme Styles */
+.dark-theme {
+    background-color: #141414 !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-card {
+    background-color: #1f1f1f !important;
+    border-color: #303030 !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-table {
+    background-color: #1f1f1f !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-table-thead > tr > th {
+    background-color: #262626 !important;
+    border-color: #303030 !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-table-tbody > tr > td {
+    background-color: #1f1f1f !important;
+    border-color: #303030 !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-table-tbody > tr:hover > td {
+    background-color: #262626 !important;
+}
+
+.dark-theme .ant-input,
+.dark-theme .ant-input-affix-wrapper {
+    background-color: #262626 !important;
+    border-color: #434343 !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-input::placeholder {
+    color: #8c8c8c !important;
+}
+
+.dark-theme .ant-select-selector {
+    background-color: #262626 !important;
+    border-color: #434343 !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-modal-content {
+    background-color: #1f1f1f !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-modal-header {
+    background-color: #1f1f1f !important;
+    border-color: #303030 !important;
+}
+
+.dark-theme .ant-modal-title {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-form-item-label > label {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-breadcrumb {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-breadcrumb a {
+    color: #1890ff !important;
+}
+
+.dark-theme .ant-pagination {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-pagination-item {
+    background-color: #262626 !important;
+    border-color: #434343 !important;
+}
+
+.dark-theme .ant-pagination-item a {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-pagination-item-active {
+    background-color: #1890ff !important;
+    border-color: #1890ff !important;
+}
+
+.dark-theme .ant-pagination-item-active a {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-select-dropdown {
+    background-color: #262626 !important;
+    border-color: #434343 !important;
+}
+
+.dark-theme .ant-select-item {
+    color: #ffffff !important;
+}
+
+.dark-theme .ant-select-item-option-selected {
+    background-color: #1890ff !important;
+}
+
+.dark-theme .ant-typography {
+    color: #ffffff !important;
+}
