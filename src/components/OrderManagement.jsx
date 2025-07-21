@@ -708,6 +708,22 @@ const OrderManagement = () => {
                     </div>
                 )}
             </Modal>
+            <style jsx>{`
+                .expired-row {
+                    background-color: #fff2f0 !important;
+                    opacity: 0.8;
+                }
+                .expired-row:hover {
+                    background-color: #ffebe8 !important;
+                }
+                .cancelled-row {
+                    background-color: #f5f5f5 !important;
+                    opacity: 0.6;
+                }
+                .cancelled-row:hover {
+                    background-color: #f0f0f0 !important;
+                }
+            `}</style>
         </div>
     );
 };
