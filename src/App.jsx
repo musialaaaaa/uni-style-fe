@@ -12,7 +12,7 @@ import Dashboard from './components/Dashboard.jsx';
 // import VoucherManagement from './components/VoucherManagement.jsx';
 // import OrderManagement from './components/OrderManagement.jsx';
 import CategoryManagement from './components/CategoryManagement.jsx';
-// import SalesManagement from './components/SalesManagement.jsx';
+import SalesManagement from './components/SalesManagement.jsx';
 // import CustomerManagement from './components/CustomerManagement.jsx';
 // import StaffManagement from './components/StaffManagement.jsx';
 import './styles/auth.css';
