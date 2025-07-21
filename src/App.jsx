@@ -9,7 +9,7 @@ import ProductList from './components/ProductList';
 import AdminLayout from './components/AdminLayout';
 import AddProductPage from './pages/AddProductPage.jsx';
 import Dashboard from './components/Dashboard.jsx';
-// import VoucherManagement from './components/VoucherManagement.jsx';
+import VoucherManagement from './components/VoucherManagement.jsx';
 // import OrderManagement from './components/OrderManagement.jsx';
 import CategoryManagement from './components/CategoryManagement.jsx';
 import SalesManagement from './components/SalesManagement.jsx';
