@@ -1,3 +1,4 @@
+// App.jsx - Updated với Account Management
 import React, { useState, useEffect, useMemo } from 'react';
 import { ConfigProvider, theme } from 'antd';
 import viVN from 'antd/locale/vi_VN';
@@ -7,9 +8,17 @@ import RegisterPage from './pages/RegisterPage';
 import ProductList from './components/ProductList';
 import AdminLayout from './components/AdminLayout';
 import AddProductPage from './pages/AddProductPage.jsx';
+import Dashboard from './components/Dashboard.jsx';
+// import VoucherManagement from './components/VoucherManagement.jsx';
+// import OrderManagement from './components/OrderManagement.jsx';
+// import CategoryManagement from './components/CategoryManagement.jsx';
+// import SalesManagement from './components/SalesManagement.jsx';
+// import CustomerManagement from './components/CustomerManagement.jsx';
+// import StaffManagement from './components/StaffManagement.jsx';
 import './styles/auth.css';
 import './styles/dark-theme.css';
 import './styles/admin-layout.css';
+
 const AppContent = () => {
     // Auth states
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -210,6 +219,7 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                         />
                     );
+
                 case 'dashboard':
                     return (
                         <AdminLayout
@@ -218,7 +228,19 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                             currentPage={currentPage}
                         >
-                            {renderPlaceholderPage('dashboard', 'Trang Dashboard', '📊')}
+                            <Dashboard />
+                        </AdminLayout>
+                    );
+
+                case 'vouchers':
+                    return (
+                        <AdminLayout
+                            currentUser={currentUser}
+                            onLogout={handleLogout}
+                            onMenuClick={handleMenuClick}
+                            currentPage={currentPage}
+                        >
+                            <VoucherManagement />
                         </AdminLayout>
                     );
 
@@ -242,19 +264,7 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                             currentPage={currentPage}
                         >
-                            {renderPlaceholderPage('categories', 'Quản Lý Danh Mục', '📂')}
-                        </AdminLayout>
-                    );
-
-                case 'vouchers':
-                    return (
-                        <AdminLayout
-                            currentUser={currentUser}
-                            onLogout={handleLogout}
-                            onMenuClick={handleMenuClick}
-                            currentPage={currentPage}
-                        >
-                            {renderPlaceholderPage('vouchers', 'Quản Lý Voucher', '🎫')}
+                            <CategoryManagement />
                         </AdminLayout>
                     );
 
@@ -266,7 +276,7 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                             currentPage={currentPage}
                         >
-                            {renderPlaceholderPage('orders', 'Quản Lý Đơn Hàng', '📦')}
+                            <OrderManagement />
                         </AdminLayout>
                     );
 
@@ -278,7 +288,11 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                             currentPage={currentPage}
                         >
-                            {renderPlaceholderPage('customer-management', 'Quản Lý Khách Hàng', '👥')}
+                            <CustomerManagement
+                                token={accessToken}
+                                userToken={userToken}
+                                currentUser={currentUser}
+                            />
                         </AdminLayout>
                     );
 
@@ -290,7 +304,11 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                             currentPage={currentPage}
                         >
-                            {renderPlaceholderPage('staff-management', 'Quản Lý Nhân Viên', '👨‍💼')}
+                            <StaffManagement
+                                token={accessToken}
+                                userToken={userToken}
+                                currentUser={currentUser}
+                            />
                         </AdminLayout>
                     );
 
@@ -302,7 +320,11 @@ const AppContent = () => {
                             onMenuClick={handleMenuClick}
                             currentPage={currentPage}
                         >
-                            {renderPlaceholderPage('sales', 'Quản Lý Bán Hàng', '💰')}
+                            <SalesManagement
+                                token={accessToken}
+                                userToken={userToken}
+                                currentUser={currentUser}
+                            />
                         </AdminLayout>
                     );
 
