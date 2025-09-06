@@ -107,7 +107,6 @@ const CategoryManagement = () => {
   const handleGetCategory = async () => {
     try {
       const res = await getCategory();
-      console.log(res);
       setCategories(res);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -155,9 +154,6 @@ const CategoryManagement = () => {
   };
 
   const handleToggleDelete = async record => {
-    const res = await deleteCategory(record.id);
-    console.log(res);
-
     if (res.status === 200) {
       messageApi.success(`Xóa danh mục thành công!`);
       handleGetCategory();
