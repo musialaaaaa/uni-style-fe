@@ -29,6 +29,7 @@ import {
   MoonOutlined,
   StockOutlined,
   BgColorsOutlined,
+  DotChartOutlined,
 } from "@ant-design/icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
@@ -79,6 +80,8 @@ const AdminLayout = ({
         return ["sizes"];
       case "colors":
         return ["colors"];
+      case "materials":
+        return ["materials"];
       default:
         return ["product-list"];
     }
@@ -141,6 +144,11 @@ const AdminLayout = ({
       key: "colors",
       icon: <BgColorsOutlined />,
       label: "Quản lý màu sắc",
+    },
+    {
+      key: "materials",
+      icon: <DotChartOutlined />,
+      label: "Quản lý chất liệu",
     },
     {
       key: "vouchers",

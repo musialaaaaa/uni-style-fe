@@ -21,6 +21,7 @@ import "./styles/admin-layout.css";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import SizeManagement from "./components/SizeManagement.jsx";
 import ColorManagement from "./components/ColorManagement.jsx";
+import MaterialManagement from "./components/MaterialManagement.jsx";
 
 const AppRoutes = () => {
   console.log("Test");
@@ -39,8 +40,6 @@ const AppRoutes = () => {
   // Stable menu handler - KHÔNG BAO GIỜ THAY ĐỔI
   const handleMenuClick = useMemo(
     () => menuKey => {
-      console.log("Menu clicked:", menuKey);
-
       switch (menuKey) {
         case "product-list":
           setCurrentPage("products");
@@ -340,6 +339,25 @@ const AppRoutes = () => {
               )
             }
           />
+
+          <Route
+            path="/materials"
+            element={
+              isAuthenticated ? (
+                <AdminLayout
+                  currentUser={currentUser}
+                  onLogout={handleLogout}
+                  onMenuClick={handleMenuClick}
+                  currentPage="materials"
+                >
+                  <MaterialManagement />
+                </AdminLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
           <Route
             path="/orders"
             element={
