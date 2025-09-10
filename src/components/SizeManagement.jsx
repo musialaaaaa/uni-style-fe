@@ -28,41 +28,41 @@ import {
   TagsOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import useCategory from "../hooks/category.jsx";
+import useSize from "../hooks/size.jsx";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 
-const CategoryManagement = () => {
-  const [categories, setCategories] = useState([]);
+const SizeManagement = () => {
+  const [sizes, setSizes] = useState([]);
   const {
-    getCategory,
-    createCategory,
-    updateCategory,
-    fetchCategoryById,
-    deleteCategory,
+    getSize,
+    createSize,
+    updateSize,
+    fetchSizeById,
+    deleteSize,
     loading,
-  } = useCategory();
+  } = useSize();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showDeletedCategories, setShowDeletedCategories] = useState(false);
+  const [showDeletedSizes, setShowDeletedSizes] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [viewingCategory, setViewingCategory] = useState(null);
+  const [editingSize, setEditingSize] = useState(null);
+  const [viewingSize, setViewingSize] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
-  // Filter categories based on search term and deleted status
-  const filteredCategories = categories.filter(category => {
+  // Filter sizes based on search term and deleted status
+  const filteredSizes = sizes.filter(size => {
     const matchesSearch =
-      category?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-      category?.createdBy?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDeletedFilter = showDeletedCategories ? category.is_deleted : !category.is_deleted;
+      size?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+      size?.createdBy?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDeletedFilter = showDeletedSizes ? size.is_deleted : !size.is_deleted;
     return matchesSearch && matchesDeletedFilter;
   });
 
   const handleEdit = record => {
-    setEditingCategory(record);
+    setEditingSize(record);
     form.setFieldsValue({
       name: record.name,
     });
@@ -70,7 +70,7 @@ const CategoryManagement = () => {
   };
 
   const handleView = record => {
-    setViewingCategory(record);
+    setViewingSize(record);
     console.log(record);
 
     setIsViewModalVisible(true);
@@ -78,13 +78,13 @@ const CategoryManagement = () => {
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
-    setEditingCategory(null);
+    setEditingSize(null);
     form.resetFields();
   };
 
   const handleCloseViewModal = () => {
     setIsViewModalVisible(false);
-    setViewingCategory(null);
+    setViewingSize(null);
   };
 
   const getCreatorAvatar = createdBy => {
@@ -108,41 +108,41 @@ const CategoryManagement = () => {
     );
   };
 
-  const handleGetCategory = async () => {
+  const handleGetSize = async () => {
     try {
-      const res = await getCategory();
-      setCategories(res);
+      const res = await getSize();
+      setSizes(res);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching sizes:", error);
     }
   };
 
   const handleSubmit = async values => {
     try {
-      if (editingCategory) {
-        // Update existing category
-        const newCategory = {
+      if (editingSize) {
+        // Update existing size
+        const newSize = {
           name: values.name,
         };
 
-        const res = await updateCategory(editingCategory.id, newCategory);
+        const res = await updateSize(editingSize.id, newSize);
         if (res) {
-          handleGetCategory();
+          handleGetSize();
         }
-        messageApi.success("Cập nhật danh mục thành công!");
+        messageApi.success("Cập nhật kích thước thành công!");
       } else {
-        // Create new category
-        const newCategory = {
+        // Create new size
+        const newSize = {
           name: values.name,
         };
 
-        const res = await createCategory(newCategory);
+        const res = await createSize(newSize);
 
         if (res) {
-          handleGetCategory();
+          handleGetSize();
         }
-        setCategories(prev => [...prev, newCategory]);
-        messageApi.success("Thêm danh mục thành công!");
+        setSizes(prev => [...prev, newSize]);
+        messageApi.success("Thêm kích thước thành công!");
       }
 
       handleCloseModal();
@@ -154,10 +154,10 @@ const CategoryManagement = () => {
   };
 
   const handleToggleDelete = async record => {
-    const res = await deleteCategory(record.id);
+    const res = await deleteSize(record.id);
     if (res.status === 200) {
-      messageApi.success(`Xóa danh mục thành công!`);
-      handleGetCategory();
+      messageApi.success(`Xóa kích thước thành công!`);
+      handleGetSize();
     } else {
       messageApi.error(res.data.message || "Có lỗi xảy ra!");
     }
@@ -177,7 +177,7 @@ const CategoryManagement = () => {
       ),
     },
     {
-      title: "Tên danh mục",
+      title: "Tên kích thước mục",
       dataIndex: "name",
       key: "name",
       width: 200,
@@ -301,7 +301,7 @@ const CategoryManagement = () => {
           </Tooltip>
 
           <Popconfirm
-            title={`Bạn có chắc chắn muốn ${record.is_deleted ? "khôi phục" : "xóa"} danh mục này?`}
+            title={`Bạn có chắc chắn muốn ${record.is_deleted ? "khôi phục" : "xóa"} kích thước này?`}
             onConfirm={() => handleToggleDelete(record)}
             okText="Có"
             cancelText="Không"
@@ -320,8 +320,8 @@ const CategoryManagement = () => {
     },
   ];
   useEffect(() => {
-    handleGetCategory();
-  }, [getCategory]);
+    handleGetSize();
+  }, []);
 
   return (
     <div style={{ padding: 24 }}>
@@ -332,7 +332,7 @@ const CategoryManagement = () => {
             <Col>
               <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
                 <TagsOutlined style={{ marginRight: 8 }} />
-                Quản lý Danh mục
+                Quản lý Kích Thước
               </Title>
             </Col>
             <Col>
@@ -346,7 +346,7 @@ const CategoryManagement = () => {
                     boxShadow: "0 2px 6px rgba(24, 144, 255, 0.3)",
                   }}
                 >
-                  Thêm danh mục
+                  Thêm kích thước
                 </Button>
               </Space>
             </Col>
@@ -357,7 +357,7 @@ const CategoryManagement = () => {
           <Row gutter={16} align="middle">
             <Col flex="auto">
               <Search
-                placeholder="Tìm theo tên danh mục hoặc người tạo..."
+                placeholder="Tìm theo tên kích thước hoặc người tạo..."
                 allowClear
                 style={{ width: "100%" }}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -366,8 +366,8 @@ const CategoryManagement = () => {
             </Col>
             <Col>
               <Text type="secondary">
-                Hiển thị {showDeletedCategories ? "đã xóa" : "hoạt động"}:{" "}
-                {filteredCategories.length} danh mục
+                Hiển thị {showDeletedSizes ? "đã xóa" : "hoạt động"}:{" "}
+                {filteredSizes.length} kích thước
               </Text>
             </Col>
           </Row>
@@ -375,16 +375,16 @@ const CategoryManagement = () => {
 
         <Table
           columns={columns}
-          dataSource={filteredCategories}
+          dataSource={filteredSizes}
           rowKey="id"
           loading={loading}
           pagination={{
-            total: filteredCategories.length,
+            total: filteredSizes.length,
             pageSize: 10,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
-              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} danh mục`,
+              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} kích thước`,
           }}
           scroll={{ x: 900 }}
           size="small"
@@ -392,9 +392,9 @@ const CategoryManagement = () => {
         />
       </Card>
 
-      {/* Add/Edit Category Modal */}
+      {/* Add/Edit Size Modal */}
       <Modal
-        title={`${editingCategory ? "Chỉnh sửa" : "Thêm"} Danh mục`}
+        title={`${editingSize ? "Chỉnh sửa" : "Thêm"} Kích Thước`}
         open={isModalVisible}
         onCancel={handleCloseModal}
         footer={null}
@@ -405,17 +405,17 @@ const CategoryManagement = () => {
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ marginTop: 16 }}>
           <Form.Item
-            label="Tên danh mục"
+            label="Tên kích thước"
             name="name"
             rules={[
-              { required: true, message: "Vui lòng nhập tên danh mục!" },
-              { min: 2, message: "Tên danh mục phải có ít nhất 2 ký tự!" },
-              { max: 50, message: "Tên danh mục không được quá 50 ký tự!" },
+              { required: true, message: "Vui lòng nhập tên kích thước!" },
+              { min: 2, message: "Tên kích thước phải có ít nhất 2 ký tự!" },
+              { max: 50, message: "Tên kích thước không được quá 50 ký tự!" },
             ]}
           >
             <Input
               prefix={<FolderOutlined />}
-              placeholder="Nhập tên danh mục"
+              placeholder="Nhập tên kích thước"
               style={{
                 borderRadius: 8,
               }}
@@ -433,16 +433,16 @@ const CategoryManagement = () => {
                 loading={loading}
                 style={{ borderRadius: 6 }}
               >
-                {editingCategory ? "Cập nhật" : "Thêm mới"}
+                {editingSize ? "Cập nhật" : "Thêm mới"}
               </Button>
             </Space>
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* View Category Details Modal */}
+      {/* View Size Details Modal */}
       <Modal
-        title="Chi tiết Danh mục"
+        title="Chi tiết kích thước"
         open={isViewModalVisible}
         onCancel={handleCloseViewModal}
         footer={[
@@ -453,15 +453,15 @@ const CategoryManagement = () => {
         width={600}
         style={{ borderRadius: 12 }}
       >
-        {viewingCategory && (
+        {viewingSize && (
           <div style={{ padding: "16px 0" }}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
                 <Card
                   size="small"
                   style={{
-                    background: viewingCategory.is_deleted ? "#fff2f0" : "#f6ffed",
-                    border: `1px solid ${viewingCategory.is_deleted ? "#ffccc7" : "#b7eb8f"}`,
+                    background: viewingSize.is_deleted ? "#fff2f0" : "#f6ffed",
+                    border: `1px solid ${viewingSize.is_deleted ? "#ffccc7" : "#b7eb8f"}`,
                     borderRadius: 8,
                   }}
                 >
@@ -470,21 +470,21 @@ const CategoryManagement = () => {
                       <FolderOutlined
                         style={{
                           fontSize: 24,
-                          color: viewingCategory.is_deleted ? "#ff4d4f" : "#52c41a",
+                          color: viewingSize.is_deleted ? "#ff4d4f" : "#52c41a",
                         }}
                       />
                     </Col>
                     <Col flex="auto">
                       <Title level={4} style={{ margin: 0 }}>
-                        {viewingCategory.name}
+                        {viewingSize.name}
                       </Title>
-                      <Tag color={viewingCategory.is_deleted ? "red" : "green"}>
-                        {viewingCategory.is_deleted ? "Đã xóa" : "Hoạt động"}
+                      <Tag color={viewingSize.is_deleted ? "red" : "green"}>
+                        {viewingSize.is_deleted ? "Đã xóa" : "Hoạt động"}
                       </Tag>
                     </Col>
                     <Col>
                       <Text strong style={{ color: "#1890ff" }}>
-                        ID: {viewingCategory.id}
+                        ID: {viewingSize.id}
                       </Text>
                     </Col>
                   </Row>
@@ -495,9 +495,9 @@ const CategoryManagement = () => {
                 <Card size="small" title="Thông tin tạo" style={{ borderRadius: 8 }}>
                   <Space direction="vertical" style={{ width: "100%" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      {getCreatorAvatar(viewingCategory.createdBy)}
+                      {getCreatorAvatar(viewingSize.createdBy)}
                       <div>
-                        <Text strong>{viewingCategory.createdBy}</Text>
+                        <Text strong>{viewingSize.createdBy}</Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Người tạo</div>
                       </div>
                     </div>
@@ -505,7 +505,7 @@ const CategoryManagement = () => {
                       <CalendarOutlined style={{ color: "#1890ff" }} />
                       <div>
                         <Text>
-                          {dayjs(viewingCategory.createdAt).format("DD/MM/YYYY HH:mm:ss")}
+                          {dayjs(viewingSize.createdAt).format("DD/MM/YYYY HH:mm:ss")}
                         </Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Ngày tạo</div>
                       </div>
@@ -518,9 +518,9 @@ const CategoryManagement = () => {
                 <Card size="small" title="Cập nhật cuối" style={{ borderRadius: 8 }}>
                   <Space direction="vertical" style={{ width: "100%" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      {getCreatorAvatar(viewingCategory.updatedBy)}
+                      {getCreatorAvatar(viewingSize.updatedBy)}
                       <div>
-                        <Text strong>{viewingCategory.updatedBy}</Text>
+                        <Text strong>{viewingSize.updatedBy}</Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Người cập nhật</div>
                       </div>
                     </div>
@@ -528,7 +528,7 @@ const CategoryManagement = () => {
                       <CalendarOutlined style={{ color: "#fa8c16" }} />
                       <div>
                         <Text>
-                          {dayjs(viewingCategory.updatedAt).format("DD/MM/YYYY HH:mm:ss")}
+                          {dayjs(viewingSize.updatedAt).format("DD/MM/YYYY HH:mm:ss")}
                         </Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Ngày cập nhật</div>
                       </div>
@@ -537,7 +537,7 @@ const CategoryManagement = () => {
                 </Card>
               </Col>
 
-              {viewingCategory.createdAt !== viewingCategory.updatedAt && (
+              {viewingSize.createdAt !== viewingSize.updatedAt && (
                 <Col span={24}>
                   <Card
                     size="small"
@@ -548,7 +548,7 @@ const CategoryManagement = () => {
                     }}
                   >
                     <Text type="secondary" style={{ fontSize: 13 }}>
-                      💡 Danh mục này đã được cập nhật sau khi tạo
+                      💡 Kích thước này đã được cập nhật sau khi tạo
                     </Text>
                   </Card>
                 </Col>
@@ -561,4 +561,4 @@ const CategoryManagement = () => {
   );
 };
 
-export default CategoryManagement;
+export default SizeManagement;

@@ -19,6 +19,7 @@ import "./styles/auth.css";
 import "./styles/dark-theme.css";
 import "./styles/admin-layout.css";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import SizeManagement from "./components/SizeManagement.jsx";
 
 const AppRoutes = () => {
   console.log("Test");
@@ -129,7 +130,6 @@ const AppRoutes = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
   };
-
 
   const handleNavigateToProducts = () => {
     setCurrentPage("products");
@@ -304,6 +304,23 @@ const AppRoutes = () => {
             }
           />
 
+          <Route
+            path="/sizes"
+            element={
+              isAuthenticated ? (
+                <AdminLayout
+                  currentUser={currentUser}
+                  onLogout={handleLogout}
+                  onMenuClick={handleMenuClick}
+                  currentPage="sizes"
+                >
+                  <SizeManagement />
+                </AdminLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
           <Route
             path="/orders"
             element={

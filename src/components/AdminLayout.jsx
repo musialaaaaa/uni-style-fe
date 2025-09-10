@@ -27,6 +27,7 @@ import {
   LockOutlined,
   SunOutlined,
   MoonOutlined,
+  StockOutlined,
 } from "@ant-design/icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
@@ -128,6 +129,11 @@ const AdminLayout = ({
       key: "categories",
       icon: <TagsOutlined />,
       label: "Quản lý danh mục",
+    },
+    {
+      key: "sizes",
+      icon: <StockOutlined />,
+      label: "Quản lý kích thước",
     },
     {
       key: "vouchers",
@@ -244,7 +250,7 @@ const AdminLayout = ({
             if (domEvent) {
               domEvent.stopPropagation();
             }
-          handleNavigate(key);
+            handleNavigate(key);
           }}
           style={{
             background: "transparent",
