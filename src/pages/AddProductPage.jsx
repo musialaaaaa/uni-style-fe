@@ -18,6 +18,9 @@ import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import AdminLayout from "../components/AdminLayout.jsx";
 import { useNavigate } from "react-router-dom";
 import useColor from "../hooks/color.jsx";
+import useProducts from "../hooks/product.jsx";
+import useSize from "../hooks/size.jsx";
+import useMaterial from "../hooks/material.jsx";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -25,12 +28,21 @@ const { Option } = Select;
 const AddProductPage = ({ currentUser, onMenuClick }) => {
   const navigate = useNavigate();
   const { getColor, colors, loading: loadingColors } = useColor();
+  const { fetchProducts, products, loading: loadingProducts } = useProducts();
+  const { getSize, sizes, loading: loadingSizes } = useSize();
+  const { getMaterial, materials, loading: loadingMaterials } = useMaterial();
 
   const colorOptions = colors.map(color => ({ value: color.id, label: color.name }));
+  const productOptions = products?.map(product => ({ value: product.id, label: product.name }));
+  const sizeOptions = sizes?.map(size => ({ value: size.id, label: size.name }));
+  const materialOptions = materials?.map(material => ({
+    value: material.id,
+    label: material.name,
+  }));
 
   const [form] = Form.useForm();
 
-  const loading = loadingColors;
+  const loading = loadingColors || loadingProducts || loadingSizes || loadingMaterials;
 
   const onLogoutClick = () => {
     navigate("/login");
@@ -90,6 +102,9 @@ const AddProductPage = ({ currentUser, onMenuClick }) => {
 
   useEffect(() => {
     getColor();
+    fetchProducts();
+    getSize();
+    getMaterial();
   }, []);
 
   return (
@@ -211,51 +226,28 @@ const AddProductPage = ({ currentUser, onMenuClick }) => {
                 <Col xs={24} sm={12}>
                   <Form.Item
                     label="Sản phẩm (chính)"
-                    name="parentProduct"
+                    name="productId"
                     rules={[{ required: true, message: "Vui lòng chọn sản phẩm chính!" }]}
                   >
                     <Select
                       placeholder="-- Chọn sản phẩm --"
                       showSearch
                       size="large"
-                      filterOption={(input, option) =>
-                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                      }
-                    >
-                      {mockParentProducts.map(product => (
-                        <Option key={product.id} value={product.id}>
-                          {product.name}
-                        </Option>
-                      ))}
-                    </Select>
+                      options={productOptions}
+                    ></Select>
                   </Form.Item>
                 </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item
-                    label="Danh mục"
-                    name="category"
-                    rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-                  >
-                    <Select placeholder="-- Chọn danh mục --" showSearch size="large"></Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Row gutter={16}>
                 <Col xs={24} sm={12}>
                   <Form.Item
                     label="Kích thước"
                     name="size"
                     rules={[{ required: true, message: "Vui lòng chọn kích thước!" }]}
                   >
-                    <Select size="large" placeholder="-- Chọn kích thước --" mode="multiple">
-                      <Option value="xs">XS</Option>
-                      <Option value="s">S</Option>
-                      <Option value="m">M</Option>
-                      <Option value="l">L</Option>
-                      <Option value="xl">XL</Option>
-                      <Option value="xxl">XXL</Option>
-                    </Select>
+                    <Select
+                      size="large"
+                      placeholder="-- Chọn kích thước --"
+                      options={sizeOptions}
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
@@ -270,16 +262,11 @@ const AddProductPage = ({ currentUser, onMenuClick }) => {
                     name="material"
                     rules={[{ required: true, message: "Vui lòng chọn chất liệu!" }]}
                   >
-                    <Select size="large" placeholder="-- Chọn chất liệu --">
-                      <Option value="cotton">Cotton</Option>
-                      <Option value="polyester">Polyester</Option>
-                      <Option value="denim">Denim</Option>
-                      <Option value="voan">Voan</Option>
-                      <Option value="canvas">Canvas</Option>
-                      <Option value="da">Da</Option>
-                      <Option value="ni">Nỉ</Option>
-                      <Option value="kaki">Kaki</Option>
-                    </Select>
+                    <Select
+                      size="large"
+                      placeholder="-- Chọn chất liệu --"
+                      options={materialOptions}
+                    ></Select>
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>

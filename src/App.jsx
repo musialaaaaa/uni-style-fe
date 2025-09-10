@@ -24,8 +24,6 @@ import ColorManagement from "./components/ColorManagement.jsx";
 import MaterialManagement from "./components/MaterialManagement.jsx";
 
 const AppRoutes = () => {
-  console.log("Test");
-
   // Auth states
   const [isAuthenticated, setIsAuthenticated] = useState(
     localStorage.getItem("accessToken") ? true : false,
@@ -513,8 +511,6 @@ const AppRoutes = () => {
 
 // Main App component with ThemeProvider wrapper
 const App = () => {
-  console.log("test");
-
   return (
     <ThemeProvider>
       <AppRoutes />
