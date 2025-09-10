@@ -27,7 +27,9 @@ const AppRoutes = () => {
   console.log("Test");
 
   // Auth states
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem("accessToken") ? true : false,
+  );
   const [currentUser, setCurrentUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [userToken, setUserToken] = useState(null); // Added for compatibility
@@ -41,36 +43,6 @@ const AppRoutes = () => {
   const handleMenuClick = useMemo(
     () => menuKey => {
       switch (menuKey) {
-        case "product-list":
-          setCurrentPage("products");
-          break;
-        case "add-product":
-          setCurrentPage("add-product");
-          break;
-        case "dashboard":
-          setCurrentPage("dashboard");
-          break;
-        case "statistics":
-          setCurrentPage("statistics");
-          break;
-        case "categories":
-          setCurrentPage("categories");
-          break;
-        case "vouchers":
-          setCurrentPage("vouchers");
-          break;
-        case "orders":
-          setCurrentPage("orders");
-          break;
-        case "customer-management":
-          setCurrentPage("customer-management");
-          break;
-        case "staff-management":
-          setCurrentPage("staff-management");
-          break;
-        case "sales":
-          setCurrentPage("sales");
-          break;
         default:
           console.log("Unknown menu:", menuKey);
       }
@@ -171,7 +143,7 @@ const AppRoutes = () => {
           Trang này đang được phát triển...
         </p>
         <button
-          onClick={() => handleMenuClick("product-list")}
+          onClick={() => handleMenuClick("products")}
           style={{
             padding: "8px 16px",
             background: "#1890ff",
@@ -387,28 +359,6 @@ const AppRoutes = () => {
                   currentPage="customer-management"
                 >
                   <CustomerManagement
-                    token={accessToken}
-                    userToken={userToken}
-                    currentUser={currentUser}
-                  />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/staff-management"
-            element={
-              isAuthenticated ? (
-                <AdminLayout
-                  currentUser={currentUser}
-                  onLogout={handleLogout}
-                  onMenuClick={handleMenuClick}
-                  currentPage="staff-management"
-                >
-                  <StaffManagement
                     token={accessToken}
                     userToken={userToken}
                     currentUser={currentUser}

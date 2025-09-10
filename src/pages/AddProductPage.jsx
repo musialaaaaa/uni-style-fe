@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Form,
@@ -17,17 +17,27 @@ import {
 import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import AdminLayout from "../components/AdminLayout.jsx";
 import { useNavigate } from "react-router-dom";
+import useColor from "../hooks/color.jsx";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
+const AddProductPage = ({ currentUser, onMenuClick }) => {
   const navigate = useNavigate();
+  const { getColor, colors, loading: loadingColors } = useColor();
+
+  const colorOptions = colors.map(color => ({ value: color.id, label: color.name }));
+
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+
+  const loading = loadingColors;
 
   const onLogoutClick = () => {
     navigate("/login");
+  };
+
+  const onNavigateBack = () => {
+    navigate(-1); // Quay lại trang trước đó
   };
 
   // Mock data cho dropdowns
@@ -53,10 +63,9 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
   ];
 
   const handleSubmit = async values => {
-    setLoading(true);
     try {
       // Simulate API call
-    //   await new Promise(resolve => setTimeout(resolve, 1500));
+      //   await new Promise(resolve => setTimeout(resolve, 1500));
 
       console.log("Product data:", values);
       message.success("Thêm sản phẩm thành công!");
@@ -71,7 +80,6 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
     } catch (error) {
       message.error("Có lỗi xảy ra khi thêm sản phẩm!");
     } finally {
-      setLoading(false);
     }
   };
 
@@ -79,6 +87,10 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
     form.resetFields();
     message.info("Đã reset form");
   };
+
+  useEffect(() => {
+    getColor();
+  }, []);
 
   return (
     <AdminLayout
@@ -124,15 +136,6 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
               <Button icon={<ArrowLeftOutlined />} onClick={onNavigateBack} type="text">
                 Quay lại
               </Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                form="add-product-form"
-                loading={loading}
-                style={{ background: "#ff8c42", borderColor: "#ff8c42" }}
-              >
-                Lưu
-              </Button>
             </div>
           </div>
 
@@ -143,28 +146,10 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
             layout="vertical"
             onFinish={handleSubmit}
             autoComplete="off"
-            size="small"
           >
             {/* Basic Information */}
-            <Card
-              title="Thông tin cơ bản"
-              size="small"
-              style={{ marginBottom: "20px" }}
-              bodyStyle={{ padding: "16px" }}
-            >
+            <Card title="Thông tin cơ bản" style={{ marginBottom: "16px" }}>
               <Row gutter={16}>
-                <Col xs={24} sm={12}>
-                  <Form.Item
-                    label="Mã sản phẩm chi tiết"
-                    name="productCode"
-                    rules={[
-                      { required: true, message: "Vui lòng nhập mã sản phẩm!" },
-                      { min: 3, message: "Mã sản phẩm phải có ít nhất 3 ký tự!" },
-                    ]}
-                  >
-                    <Input placeholder="Nhập mã sản phẩm" />
-                  </Form.Item>
-                </Col>
                 <Col xs={24} sm={12}>
                   <Form.Item
                     label="Tên sản phẩm chi tiết"
@@ -174,12 +159,9 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                       { min: 5, message: "Tên sản phẩm phải có ít nhất 5 ký tự!" },
                     ]}
                   >
-                    <Input placeholder="Nhập tên sản phẩm" />
+                    <Input size="medium" placeholder="Nhập tên sản phẩm" />
                   </Form.Item>
                 </Col>
-              </Row>
-
-              <Row gutter={16}>
                 <Col xs={24} sm={12}>
                   <Form.Item
                     label="Số lượng"
@@ -190,6 +172,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     ]}
                   >
                     <InputNumber
+                      size="large"
                       placeholder="Nhập số lượng"
                       style={{ width: "100%" }}
                       min={0}
@@ -197,6 +180,8 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     />
                   </Form.Item>
                 </Col>
+              </Row>
+              <Row gutter={16}>
                 <Col xs={24} sm={12}>
                   <Form.Item
                     label="Giá"
@@ -207,6 +192,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     ]}
                   >
                     <InputNumber
+                      size="large"
                       placeholder="Nhập giá"
                       style={{ width: "100%" }}
                       min={0}
@@ -220,12 +206,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
             </Card>
 
             {/* Product Relations */}
-            <Card
-              title="Liên kết sản phẩm"
-              size="small"
-              style={{ marginBottom: "20px" }}
-              bodyStyle={{ padding: "16px" }}
-            >
+            <Card title="Liên kết sản phẩm" style={{ marginBottom: "20px" }}>
               <Row gutter={16}>
                 <Col xs={24} sm={12}>
                   <Form.Item
@@ -236,6 +217,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     <Select
                       placeholder="-- Chọn sản phẩm --"
                       showSearch
+                      size="large"
                       filterOption={(input, option) =>
                         option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                       }
@@ -254,19 +236,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     name="category"
                     rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
                   >
-                    <Select
-                      placeholder="-- Chọn danh mục --"
-                      showSearch
-                      filterOption={(input, option) =>
-                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                      }
-                    >
-                      {mockCategories.map(category => (
-                        <Option key={category.id} value={category.id}>
-                          {category.name}
-                        </Option>
-                      ))}
-                    </Select>
+                    <Select placeholder="-- Chọn danh mục --" showSearch size="large"></Select>
                   </Form.Item>
                 </Col>
               </Row>
@@ -274,32 +244,11 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
               <Row gutter={16}>
                 <Col xs={24} sm={12}>
                   <Form.Item
-                    label="Thương hiệu"
-                    name="brand"
-                    rules={[{ required: true, message: "Vui lòng chọn thương hiệu!" }]}
-                  >
-                    <Select
-                      placeholder="-- Chọn thương hiệu --"
-                      showSearch
-                      filterOption={(input, option) =>
-                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                      }
-                    >
-                      {mockBrands.map(brand => (
-                        <Option key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Form.Item
                     label="Kích thước"
                     name="size"
                     rules={[{ required: true, message: "Vui lòng chọn kích thước!" }]}
                   >
-                    <Select placeholder="-- Chọn kích thước --" mode="multiple">
+                    <Select size="large" placeholder="-- Chọn kích thước --" mode="multiple">
                       <Option value="xs">XS</Option>
                       <Option value="s">S</Option>
                       <Option value="m">M</Option>
@@ -313,12 +262,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
             </Card>
 
             {/* Product Details */}
-            <Card
-              title="Chi tiết sản phẩm"
-              size="small"
-              style={{ marginBottom: "20px" }}
-              bodyStyle={{ padding: "16px" }}
-            >
+            <Card title="Chi tiết sản phẩm" style={{ marginBottom: "20px" }}>
               <Row gutter={16}>
                 <Col xs={24} sm={12}>
                   <Form.Item
@@ -326,7 +270,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     name="material"
                     rules={[{ required: true, message: "Vui lòng chọn chất liệu!" }]}
                   >
-                    <Select placeholder="-- Chọn chất liệu --">
+                    <Select size="large" placeholder="-- Chọn chất liệu --">
                       <Option value="cotton">Cotton</Option>
                       <Option value="polyester">Polyester</Option>
                       <Option value="denim">Denim</Option>
@@ -344,17 +288,11 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     name="color"
                     rules={[{ required: true, message: "Vui lòng chọn màu sắc!" }]}
                   >
-                    <Select placeholder="-- Chọn màu sắc --" mode="multiple">
-                      <Option value="trang">Trắng</Option>
-                      <Option value="den">Đen</Option>
-                      <Option value="xam">Xám</Option>
-                      <Option value="xanh">Xanh</Option>
-                      <Option value="do">Đỏ</Option>
-                      <Option value="vang">Vàng</Option>
-                      <Option value="hong">Hồng</Option>
-                      <Option value="navy">Navy</Option>
-                      <Option value="be">Be</Option>
-                    </Select>
+                    <Select
+                      options={colorOptions}
+                      size="large"
+                      placeholder="-- Chọn màu sắc --"
+                    ></Select>
                   </Form.Item>
                 </Col>
               </Row>
@@ -366,7 +304,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                     name="dimensions"
                     tooltip="Ví dụ: 35x40x10 cm (Dài x Rộng x Cao)"
                   >
-                    <Input placeholder="Ví dụ: 35x40x10 cm" />
+                    <Input size="medium" placeholder="Ví dụ: 35x40x10 cm" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12}>
@@ -405,6 +343,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
                 ]}
               >
                 <Input.TextArea
+                  size="medium"
                   rows={4}
                   placeholder="Nhập mô tả chi tiết sản phẩm..."
                   showCount
@@ -414,7 +353,7 @@ const AddProductPage = ({ currentUser, onNavigateBack, onMenuClick }) => {
             </Card>
 
             {/* Action Buttons */}
-            <Card size="small" style={{ textAlign: "center", padding: "8px" }}>
+            <Card style={{ textAlign: "center", padding: "8px" }}>
               <Space size="middle">
                 <Button
                   onClick={() => onNavigateBack && onNavigateBack()}

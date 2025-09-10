@@ -57,7 +57,7 @@ const AdminLayout = ({
   const getSelectedKeys = () => {
     switch (currentPage) {
       case "products":
-        return ["product-list"];
+        return ["products"];
       case "add-product":
         return ["add-product"];
       case "dashboard":
@@ -83,7 +83,7 @@ const AdminLayout = ({
       case "materials":
         return ["materials"];
       default:
-        return ["product-list"];
+        return ["product"];
     }
   };
 
@@ -121,7 +121,7 @@ const AdminLayout = ({
       label: "Quản lý sản phẩm",
       children: [
         {
-          key: "product-list",
+          key: "products",
           label: "Danh sách",
         },
         {
@@ -168,10 +168,6 @@ const AdminLayout = ({
         {
           key: "customer-management",
           label: "Quản lý khách hàng",
-        },
-        {
-          key: "staff-management",
-          label: "Quản lý nhân viên",
         },
       ],
     },

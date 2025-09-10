@@ -29,16 +29,16 @@ import {
   EyeOutlined,
   SaveOutlined,
   CloseOutlined,
-  CheckCircleOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { useFetcher, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useProducts from "../hooks/product.jsx";
+import useCategory from "../hooks/category.jsx";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "products" }) => {
+const ProductList = ({}) => {
   // Configure notification placement for center screen
   notification.config({
     placement: "top",
@@ -47,7 +47,14 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
     maxCount: 3,
   });
   const navigate = useNavigate();
-  const { fetchProducts, fetchProductId, updateProduct, createProduct, deleteProduct } = useProducts();
+  const { fetchProducts, fetchProductId, updateProduct, createProduct, deleteProduct } =
+    useProducts();
+  const { getCategory, categories, loading: loadingCategories } = useCategory();
+
+  const categoryOptions = categories.map(category => ({
+    value: category.id,
+    label: category.name,
+  }));
 
   const Context = React.createContext({ name: "Default" });
   const [api, contextHolder] = notification.useNotification();
@@ -96,12 +103,6 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
   const [useMockData, setUseMockData] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
 
-  // States for dropdown options
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [materials, setMaterials] = useState([]);
-  const [colors, setColors] = useState([]);
-  const [sizes, setSizes] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
 
   // Mock data với state management
@@ -122,8 +123,6 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
 
   // Load data from API
   const loadApiData = async () => {
-    console.log("Loading API data...");
-
     setApiLoading(true);
     setLoading(true);
     try {
@@ -178,6 +177,7 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
         code: productDetail.code,
         name: productDetail.name,
         description: productDetail.description,
+        category: productDetail.category?.name,
         createdBy: productDetail.createdBy,
         createdAt: productDetail.createdAt,
         updatedBy: productDetail.updatedBy,
@@ -254,8 +254,6 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
   // Update product status via API (soft delete)
   const updateProductStatusApi = async (productId, isDeleted) => {
     try {
-      const currentProduct = products.find(p => p.id === productId);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -281,7 +279,7 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
     try {
       // Load detail from API
       setLoading(true);
-     await loadProductDetailApi(product.id);
+      await loadProductDetailApi(product.id);
       setLoading(false);
     } catch (error) {
       console.error("Error loading product detail:", error);
@@ -381,6 +379,7 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
       code: product.code,
       name: product.name,
       description: product.description,
+      category: product.category?.id,
     });
     setModalVisible(true);
   };
@@ -406,7 +405,11 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
 
       if (editingProduct) {
         console.log("🔥 API: Editing existing product");
-        await saveProductApi({ ...editingProduct, ...values }, true);
+        await updateProduct(
+          editingProduct.id,
+          { ...editingProduct, ...values, categoryId: values.category },
+          true,
+        );
 
         // Multiple notification methods to ensure visibility
         showSuccessNotification(
@@ -639,6 +642,12 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
     },
   ];
 
+  // Initial load
+  useEffect(() => {
+    loadData();
+    getCategory();
+  }, [pagination.current, pagination.pageSize]);
+
   return (
     <div className="product-list-container">
       {/* Breadcrumb */}
@@ -820,6 +829,14 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
             >
               <Input placeholder="Nhập tên sản phẩm" />
             </Form.Item>
+            <Form.Item label="Danh mục" name="category">
+              <Select
+                placeholder="-- Chọn danh mục --"
+                showSearch
+                size="large"
+                options={categoryOptions}
+              />
+            </Form.Item>
             <Form.Item
               label="Mô tả"
               name="description"
@@ -941,269 +958,22 @@ const ProductList = ({ token: propToken, onNavigateToAddProduct, currentPage = "
                       />
                     </Form.Item>
                   </Col>
-
-                  {/* {!useMockData && (
-                    <>
-                      <Col span={12}>
-                        <Form.Item
-                          label={
-                            <span style={{ color: "#1890ff", fontWeight: "bold" }}>Giá (VNĐ)</span>
-                          }
-                          name="price"
-                          rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
-                        >
-                          <InputNumber
-                            style={{
-                              width: "100%",
-                              color: isEditingInDetail ? "#000" : "#ff4d4f",
-                              fontWeight: isEditingInDetail ? "normal" : "bold",
-                            }}
-                            formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                            parser={value => value.replace(/\$\s?|(,*)/g, "")}
-                            min={0}
-                            disabled={!isEditingInDetail}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          label={
-                            <span style={{ color: "#1890ff", fontWeight: "bold" }}>Số lượng</span>
-                          }
-                          name="quantity"
-                          rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
-                        >
-                          <InputNumber
-                            style={{
-                              width: "100%",
-                              color: isEditingInDetail ? "#000" : "#1890ff",
-                              fontWeight: isEditingInDetail ? "normal" : "bold",
-                            }}
-                            min={0}
-                            disabled={!isEditingInDetail}
-                          />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        {isEditingInDetail ? (
-                          <Form.Item
-                            label={
-                              <span style={{ color: "#1890ff", fontWeight: "bold" }}>Danh mục</span>
-                            }
-                            name="categoryId"
-                            rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-                          >
-                            <Select
-                              placeholder="Chọn danh mục"
-                              style={{ width: "100%" }}
-                              loading={loadingOptions}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                option?.children?.toLowerCase()?.indexOf(input.toLowerCase()) >= 0
-                              }
-                            >
-                              {categories.map(category => (
-                                <Option key={category.name} value={category.name}>
-                                  {category.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
-                        ) : (
-                          <div style={{ marginBottom: "16px" }}>
-                            <strong style={{ color: "#1890ff" }}>Danh mục:</strong>
-                            <div style={{ marginTop: "4px", color: "#1890ff", fontWeight: "bold" }}>
-                              {viewingProduct.category?.name || "Chưa có"}
-                            </div>
-                          </div>
-                        )}
-                      </Col>
-                      <Col span={12}>
-                        {isEditingInDetail ? (
-                          <Form.Item
-                            label={
-                              <span style={{ color: "#1890ff", fontWeight: "bold" }}>
-                                Thương hiệu
-                              </span>
-                            }
-                            name="brandId"
-                            rules={[{ required: true, message: "Vui lòng chọn thương hiệu!" }]}
-                          >
-                            <Select
-                              placeholder="Chọn thương hiệu"
-                              style={{ width: "100%" }}
-                              loading={loadingOptions}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                option?.children?.toLowerCase()?.indexOf(input.toLowerCase()) >= 0
-                              }
-                            >
-                              {brands.map(brand => (
-                                <Option key={brand.id} value={brand.id}>
-                                  {brand.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
-                        ) : (
-                          <div style={{ marginBottom: "16px" }}>
-                            <strong style={{ color: "#1890ff" }}>Thương hiệu:</strong>
-                            <div style={{ marginTop: "4px", color: "#1890ff", fontWeight: "bold" }}>
-                              {viewingProduct.brand?.name || "Chưa có"}
-                            </div>
-                          </div>
-                        )}
-                      </Col>
-                      <Col span={12}>
-                        {isEditingInDetail ? (
-                          <Form.Item
-                            label={
-                              <span style={{ color: "#1890ff", fontWeight: "bold" }}>
-                                Chất liệu
-                              </span>
-                            }
-                            name="materialId"
-                            rules={[{ required: true, message: "Vui lòng chọn chất liệu!" }]}
-                          >
-                            <Select
-                              placeholder="Chọn chất liệu"
-                              style={{ width: "100%" }}
-                              loading={loadingOptions}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                option?.children?.toLowerCase()?.indexOf(input.toLowerCase()) >= 0
-                              }
-                            >
-                              {materials.map(material => (
-                                <Option key={material.id} value={material.id}>
-                                  {material.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
-                        ) : (
-                          <div style={{ marginBottom: "16px" }}>
-                            <strong style={{ color: "#1890ff" }}>Chất liệu:</strong>
-                            <div style={{ marginTop: "4px", color: "#1890ff", fontWeight: "bold" }}>
-                              {viewingProduct.material?.name || "Chưa có"}
-                            </div>
-                          </div>
-                        )}
-                      </Col>
-                      <Col span={12}>
-                        {isEditingInDetail ? (
-                          <Form.Item
-                            label={
-                              <span style={{ color: "#1890ff", fontWeight: "bold" }}>Màu sắc</span>
-                            }
-                            name="colorId"
-                            rules={[{ required: true, message: "Vui lòng chọn màu sắc!" }]}
-                          >
-                            <Select
-                              placeholder="Chọn màu sắc"
-                              style={{ width: "100%" }}
-                              loading={loadingOptions}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                option?.children?.toLowerCase()?.indexOf(input.toLowerCase()) >= 0
-                              }
-                            >
-                              {colors.map(color => (
-                                <Option key={color.id} value={color.id}>
-                                  {color.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
-                        ) : (
-                          <div style={{ marginBottom: "16px" }}>
-                            <strong style={{ color: "#1890ff" }}>Màu sắc:</strong>
-                            <div style={{ marginTop: "4px", color: "#1890ff", fontWeight: "bold" }}>
-                              {viewingProduct.color?.name || "Chưa có"}
-                            </div>
-                          </div>
-                        )}
-                      </Col>
-                      <Col span={12}>
-                        {isEditingInDetail ? (
-                          <Form.Item
-                            label={
-                              <span style={{ color: "#1890ff", fontWeight: "bold" }}>
-                                Kích thước
-                              </span>
-                            }
-                            name="sizeId"
-                            rules={[{ required: true, message: "Vui lòng chọn kích thước!" }]}
-                          >
-                            <Select
-                              placeholder="Chọn kích thước"
-                              style={{ width: "100%" }}
-                              loading={loadingOptions}
-                              showSearch
-                              optionFilterProp="children"
-                              filterOption={(input, option) =>
-                                option?.children?.toLowerCase()?.indexOf(input.toLowerCase()) >= 0
-                              }
-                            >
-                              {sizes.map(size => (
-                                <Option key={size.id} value={size.id}>
-                                  {size.name}
-                                </Option>
-                              ))}
-                            </Select>
-                          </Form.Item>
-                        ) : (
-                          <div style={{ marginBottom: "16px" }}>
-                            <strong style={{ color: "#1890ff" }}>Kích thước:</strong>
-                            <div style={{ marginTop: "4px", color: "#1890ff", fontWeight: "bold" }}>
-                              {viewingProduct.size?.name || "Chưa có"}
-                            </div>
-                          </div>
-                        )}
-                      </Col>
-                    </>
-                  )} */}
-
-                  {useMockData && (
-                    <>
-                      <Col span={12}>
-                        <div style={{ marginBottom: "16px" }}>
-                          <strong style={{ color: "#1890ff" }}>Người tạo:</strong>
-                          <div style={{ marginTop: "4px", color: "#666" }}>
-                            {viewingProduct.createdBy}
-                          </div>
-                        </div>
-                      </Col>
-                      <Col span={12}>
-                        <div style={{ marginBottom: "16px" }}>
-                          <strong style={{ color: "#1890ff" }}>Ngày tạo:</strong>
-                          <div style={{ marginTop: "4px", color: "#666" }}>
-                            {new Date(viewingProduct.createdAt).toLocaleString("vi-VN")}
-                          </div>
-                        </div>
-                      </Col>
-                      <Col span={12}>
-                        <div style={{ marginBottom: "16px" }}>
-                          <strong style={{ color: "#1890ff" }}>Người cập nhật:</strong>
-                          <div style={{ marginTop: "4px", color: "#666" }}>
-                            {viewingProduct.updatedBy}
-                          </div>
-                        </div>
-                      </Col>
-                      <Col span={12}>
-                        <div style={{ marginBottom: "16px" }}>
-                          <strong style={{ color: "#1890ff" }}>Ngày cập nhật:</strong>
-                          <div style={{ marginTop: "4px", color: "#666" }}>
-                            {new Date(viewingProduct.updatedAt).toLocaleString("vi-VN")}
-                          </div>
-                        </div>
-                      </Col>
-                    </>
-                  )}
+                  <Col span={24}>
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1890ff", fontWeight: "bold" }}>Tên Danh Mục</span>
+                      }
+                      name="category"
+                    >
+                      <Input
+                        disabled={!isEditingInDetail}
+                        style={{
+                          color: isEditingInDetail ? "#000" : "#1890ff",
+                          fontWeight: isEditingInDetail ? "normal" : "bold",
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
 
                   <Col span={24}>
                     <Form.Item
