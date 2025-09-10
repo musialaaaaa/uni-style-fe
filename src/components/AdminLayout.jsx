@@ -28,6 +28,7 @@ import {
   SunOutlined,
   MoonOutlined,
   StockOutlined,
+  BgColorsOutlined,
 } from "@ant-design/icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
@@ -74,6 +75,10 @@ const AdminLayout = ({
         return ["staff-management"];
       case "sales":
         return ["sales"];
+      case "sizes":
+        return ["sizes"];
+      case "colors":
+        return ["colors"];
       default:
         return ["product-list"];
     }
@@ -85,9 +90,6 @@ const AdminLayout = ({
       case "products":
       case "add-product":
         return ["products"];
-      case "customer-management":
-      case "staff-management":
-        return ["accounts"];
       default:
         return [];
     }
@@ -134,6 +136,11 @@ const AdminLayout = ({
       key: "sizes",
       icon: <StockOutlined />,
       label: "Quản lý kích thước",
+    },
+    {
+      key: "colors",
+      icon: <BgColorsOutlined />,
+      label: "Quản lý màu sắc",
     },
     {
       key: "vouchers",

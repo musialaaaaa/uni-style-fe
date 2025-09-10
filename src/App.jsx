@@ -20,6 +20,7 @@ import "./styles/dark-theme.css";
 import "./styles/admin-layout.css";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import SizeManagement from "./components/SizeManagement.jsx";
+import ColorManagement from "./components/ColorManagement.jsx";
 
 const AppRoutes = () => {
   console.log("Test");
@@ -315,6 +316,24 @@ const AppRoutes = () => {
                   currentPage="sizes"
                 >
                   <SizeManagement />
+                </AdminLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/colors"
+            element={
+              isAuthenticated ? (
+                <AdminLayout
+                  currentUser={currentUser}
+                  onLogout={handleLogout}
+                  onMenuClick={handleMenuClick}
+                  currentPage="colors"
+                >
+                  <ColorManagement />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
