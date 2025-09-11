@@ -50,12 +50,26 @@ const useAuth = () => {
     }
   }, []);
 
+  	  const changePassword = useCallback(async input => {
+        try {
+          setLoading(true);
+
+          const response = await api.post("/auth/change-password", input);
+          setLoading(false);
+
+          return response.data;
+        } catch (error) {
+          setError(error);
+          setLoading(false);
+        }
+      }, []);
   return {
     loading,
     error,
     fetchSignIn,
-		fetchSignOut,
-		fetchRegister
+    fetchSignOut,
+    fetchRegister,
+    changePassword,
   };
 };
 

@@ -33,6 +33,7 @@ import {
 } from "@ant-design/icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
+import useAuth from '../hooks/auth';
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -44,6 +45,9 @@ const AdminLayout = ({
   onMenuClick,
   currentPage = "products",
 }) => {
+    const { changePassword } = useAuth();
+    const [messageApi, contextHolder] = message.useMessage();
+
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const [changePasswordModal, setChangePasswordModal] = useState(false);
@@ -180,14 +184,16 @@ const AdminLayout = ({
 
   const handleChangePassword = async values => {
     try {
+      const response = await changePassword(values);
+      
       // Call API to change password
       // const response = await changePasswordAPI(values);
 
-      message.success("Đổi mật khẩu thành công!");
+      messageApi.success("Đổi mật khẩu thành công!");
       setChangePasswordModal(false);
       passwordForm.resetFields();
     } catch (error) {
-      message.error("Đổi mật khẩu thất bại!");
+      messageApi.error("Đổi mật khẩu thất bại!");
     }
   };
 
@@ -204,14 +210,6 @@ const AdminLayout = ({
       onClick: () => setChangePasswordModal(true),
     },
     {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "Cài đặt",
-    },
-    {
-      type: "divider",
-    },
-    {
       key: "logout",
       icon: <LogoutOutlined />,
       label: "Đăng xuất",
@@ -225,6 +223,7 @@ const AdminLayout = ({
       className={`admin-layout ${isDarkMode ? "dark-theme" : "light-theme"}`}
       style={{ minHeight: "100vh" }}
     >
+      {contextHolder}
       {/* Sidebar */}
       <Sider
         trigger={null}
@@ -350,7 +349,7 @@ const AdminLayout = ({
       </Layout>
 
       {/* Change Password Modal */}
-      <Modal
+      {changePasswordModal &&<Modal
         title="Đổi mật khẩu"
         open={changePasswordModal}
         onCancel={() => {
@@ -367,16 +366,8 @@ const AdminLayout = ({
           className="admin-form"
         >
           <Form.Item
-            label="Mật khẩu hiện tại"
-            name="currentPassword"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu hiện tại!" }]}
-          >
-            <Input.Password placeholder="Nhập mật khẩu hiện tại" />
-          </Form.Item>
-
-          <Form.Item
             label="Mật khẩu mới"
-            name="newPassword"
+            name="password"
             rules={[
               { required: true, message: "Vui lòng nhập mật khẩu mới!" },
               { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
@@ -388,12 +379,12 @@ const AdminLayout = ({
           <Form.Item
             label="Xác nhận mật khẩu mới"
             name="confirmPassword"
-            dependencies={["newPassword"]}
+            dependencies={["password"]}
             rules={[
               { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue("newPassword") === value) {
+                  if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
                   return Promise.reject(new Error("Mật khẩu xác nhận không khớp!"));
@@ -420,7 +411,7 @@ const AdminLayout = ({
             </Space>
           </Form.Item>
         </Form>
-      </Modal>
+      </Modal>}
     </Layout>
   );
 };

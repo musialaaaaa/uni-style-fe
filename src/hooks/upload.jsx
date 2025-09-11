@@ -22,33 +22,30 @@ const useImageUpload = () => {
 		setProgress(0);
 		
 		try {
-			const formData = new FormData();
-			
-			// Append each file to form data
-			Array.from(files).forEach((file) => {
-				formData.append('images', file);
-			});
-			
-			const response = await api.post('/images/upload', formData, {
-				headers: {
-					'Content-Type': 'multipart/form-data',
-				},
-				onUploadProgress: (progressEvent) => {
-					const percentCompleted = Math.round(
-						(progressEvent.loaded * 100) / progressEvent.total
-					);
-					setProgress(percentCompleted);
-				},
-			});
-			
-			setUploadedImages(response.data);
-			return response.data;
-		} catch (err) {
-			setError(err.response?.data?.message || 'Error uploading images');
-			throw err;
-		} finally {
-			setLoading(false);
-		}
+      const formData = new FormData();
+
+      // Append each file to form data
+      Array.from(files).forEach(file => {
+        formData.append("files", file);
+      });
+
+      const response = await api.post("/images/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: progressEvent => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+        },
+      });
+      setUploadedImages(response.data.data);
+      return response.data.data;
+    } catch (err) {
+      setError(err.response?.data?.message || "Error uploading images");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
 	};
 
 	/**

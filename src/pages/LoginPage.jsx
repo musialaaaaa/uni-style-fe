@@ -26,7 +26,7 @@ import useAuth from "../hooks/auth";
 
 const { Title, Text, Link } = Typography;
 
-const LoginPage = ({ handleIsAuthenticated }) => {
+const LoginPage = ({ handleIsAuthenticated, handleLoginSuccess }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const LoginPage = ({ handleIsAuthenticated }) => {
         // Store tokens in localStorage
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
-        handleIsAuthenticated()
+        handleIsAuthenticated();
       } else {
         // Handle error response from API
         if (response.error) {

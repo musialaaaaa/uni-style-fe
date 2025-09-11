@@ -72,6 +72,8 @@ const AppRoutes = () => {
     setIsAuthenticated(true);
     setAccessToken(token);
     setUserToken(token); // Set both tokens for compatibility
+    console.log("userData on login:", userData);
+    
     setCurrentUser({
       username: userData?.username || "admin",
       role: userData?.role || "Administrator",
