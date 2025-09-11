@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Layout,
   Menu,
@@ -33,25 +33,24 @@ import {
 } from "@ant-design/icons";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import useAuth from '../hooks/auth';
+import useAuth from "../hooks/auth";
+import useAccount from "../hooks/account";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-const AdminLayout = ({
-  children,
-  onLogout,
-  currentUser = { username: "admin", role: "Administrator" },
-  onMenuClick,
-  currentPage = "products",
-}) => {
-    const { changePassword } = useAuth();
-    const [messageApi, contextHolder] = message.useMessage();
+const AdminLayout = ({ children, onLogout, currentPage = "products" }) => {
+  const { changePassword } = useAuth();
+  const { myAccount, fetchMyAccount, updateMyAccount } = useAccount();
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const [isOpenAccountDetail, setIsOpenAccountDetail] = useState(false);
   const [changePasswordModal, setChangePasswordModal] = useState(false);
   const [passwordForm] = Form.useForm();
+  const [accountForm] = Form.useForm();
   const { isDarkMode, toggleTheme } = useTheme();
   const handleNavigate = page => {
     navigate(`/${page}`);
@@ -185,7 +184,7 @@ const AdminLayout = ({
   const handleChangePassword = async values => {
     try {
       const response = await changePassword(values);
-      
+
       // Call API to change password
       // const response = await changePasswordAPI(values);
 
@@ -197,11 +196,30 @@ const AdminLayout = ({
     }
   };
 
+  const handleChangeAccountInfo = async values => {
+    try {
+      const response = await updateMyAccount(values);
+      if (response && response.data) {
+        messageApi.success("Cập nhật thông tin tài khoản thành công!");
+        setIsOpenAccountDetail(false);
+      }
+    } catch (error) {
+      messageApi.error("Cập nhật thông tin tài khoản thất bại!");
+    }
+  };
   const userMenuItems = [
     {
       key: "profile",
       icon: <UserOutlined />,
       label: "Thông tin cá nhân",
+      onClick: () => {
+        accountForm.setFieldsValue({
+          email: myAccount.email,
+          fullName: myAccount.fullName,
+          phone: myAccount.phone,
+        });
+        setIsOpenAccountDetail(true);
+      },
     },
     {
       key: "change-password",
@@ -217,7 +235,9 @@ const AdminLayout = ({
       danger: true,
     },
   ];
-
+  useEffect(() => {
+    fetchMyAccount();
+  }, []);
   return (
     <Layout
       className={`admin-layout ${isDarkMode ? "dark-theme" : "light-theme"}`}
@@ -325,8 +345,8 @@ const AdminLayout = ({
                 <Space>
                   <Avatar className="admin-user-avatar" icon={<UserOutlined />} />
                   <div className="admin-user-info">
-                    <div className="admin-user-name">{currentUser?.username}</div>
-                    <div className="admin-user-role">{currentUser?.role}</div>
+                    <div className="admin-user-name">{myAccount?.fullName}</div>
+                    <div className="admin-user-role">{myAccount?.role}</div>
                   </div>
                 </Space>
               </div>
@@ -349,69 +369,130 @@ const AdminLayout = ({
       </Layout>
 
       {/* Change Password Modal */}
-      {changePasswordModal &&<Modal
-        title="Đổi mật khẩu"
-        open={changePasswordModal}
-        onCancel={() => {
-          setChangePasswordModal(false);
-          passwordForm.resetFields();
-        }}
-        footer={null}
-        width={500}
-      >
-        <Form
-          form={passwordForm}
-          layout="vertical"
-          onFinish={handleChangePassword}
-          className="admin-form"
+      {changePasswordModal && (
+        <Modal
+          title="Đổi mật khẩu"
+          open={changePasswordModal}
+          onCancel={() => {
+            setChangePasswordModal(false);
+            passwordForm.resetFields();
+          }}
+          footer={null}
+          width={500}
         >
-          <Form.Item
-            label="Mật khẩu mới"
-            name="password"
-            rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu mới!" },
-              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
-            ]}
+          <Form
+            form={passwordForm}
+            layout="vertical"
+            onFinish={handleChangePassword}
+            className="admin-form"
           >
-            <Input.Password placeholder="Nhập mật khẩu mới" />
-          </Form.Item>
+            <Form.Item
+              label="Mật khẩu mới"
+              name="password"
+              rules={[
+                { required: true, message: "Vui lòng nhập mật khẩu mới!" },
+                { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+              ]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu mới" />
+            </Form.Item>
 
-          <Form.Item
-            label="Xác nhận mật khẩu mới"
-            name="confirmPassword"
-            dependencies={["password"]}
-            rules={[
-              { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error("Mật khẩu xác nhận không khớp!"));
-                },
-              }),
-            ]}
+            <Form.Item
+              label="Xác nhận mật khẩu mới"
+              name="confirmPassword"
+              dependencies={["password"]}
+              rules={[
+                { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Mật khẩu xác nhận không khớp!"));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password placeholder="Xác nhận mật khẩu mới" />
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
+              <Space>
+                <Button
+                  onClick={() => {
+                    setChangePasswordModal(false);
+                    passwordForm.resetFields();
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button type="primary" htmlType="submit" className="admin-btn-primary">
+                  Đổi mật khẩu
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
+      {/* Cập nhập thông tin cá nhân*/}
+      {isOpenAccountDetail && (
+        <Modal
+          title="Cập nhật thông tin cá nhân"
+          open={isOpenAccountDetail}
+          onCancel={() => {
+            setIsOpenAccountDetail(false);
+            accountForm.resetFields();
+          }}
+          footer={null}
+          width={500}
+        >
+          <Form
+            form={accountForm}
+            layout="vertical"
+            onFinish={handleChangeAccountInfo}
+            className="admin-form"
           >
-            <Input.Password placeholder="Xác nhận mật khẩu mới" />
-          </Form.Item>
+            <Form.Item
+              label="Tên người dùng"
+              name="fullName"
+              rules={[{ required: true, message: "Vui lòng nhập tên người dùng!" }]}
+            >
+              <Input placeholder="Nhập tên người dùng" />
+            </Form.Item>
 
-          <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-            <Space>
-              <Button
-                onClick={() => {
-                  setChangePasswordModal(false);
-                  passwordForm.resetFields();
-                }}
-              >
-                Hủy
-              </Button>
-              <Button type="primary" htmlType="submit" className="admin-btn-primary">
-                Đổi mật khẩu
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>}
+            <Form.Item
+              label="Số điện thoại"
+              name="phone"
+              rules={[
+                { required: true, message: "Vui lòng nhập số điện thoại!" },
+                { min: 10, message: "Số điện thoại phải có ít nhất 10 ký tự!" },
+              ]}
+            >
+              <Input placeholder="Nhập số điện thoại" />
+            </Form.Item>
+
+            <Form.Item label="Email" name="email" dependencies={["email"]}>
+              <Input placeholder="Xác nhận mật khẩu mới" />
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
+              <Space>
+                <Button
+                  onClick={() => {
+                    setIsOpenAccountDetail(false);
+                    accountForm.resetFields();
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button type="primary" htmlType="submit" className="admin-btn-primary">
+                  Cập nhập thông tài khoản
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+      )}
     </Layout>
   );
 };
