@@ -89,22 +89,8 @@ const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi 
   };
 
   // Get open keys for submenu
-  const getOpenKeys = () => {
-    switch (currentPage) {
-      case "products":
-      case "add-product":
-        return ["products"];
-      default:
-        return [];
-    }
-  };
 
   const menuItems = [
-    {
-      key: "dashboard",
-      icon: <DashboardOutlined />,
-      label: "Dashboard",
-    },
     {
       key: "interface",
       icon: <SettingOutlined />,
@@ -268,7 +254,7 @@ const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi 
         <Menu
           mode="inline"
           selectedKeys={getSelectedKeys()}
-          defaultOpenKeys={getOpenKeys()}
+          defaultSelectedKeys={["statistics"]}
           className="admin-menu"
           items={menuItems}
           forceSubMenuRender={true}

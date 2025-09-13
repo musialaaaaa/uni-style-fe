@@ -420,59 +420,9 @@ const CustomerManagement = ({ messageApi }) => {
     },
   ];
 
-  // Statistics calculations
-  const totalCustomers = customers.length;
-  const activeCustomers = customers.filter(c => c.status === "active").length;
-  const totalRevenue = customers.reduce((sum, c) => sum + c.total_spent, 0);
-  const avgOrderValue = customers.reduce((sum, c) => sum + c.total_orders, 0);
 
   return (
     <div style={{ padding: "0 24px 24px 24px" }}>
-      {/* Statistics Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Tổng khách hàng"
-              value={totalCustomers}
-              prefix={<UserOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Khách hàng hoạt động"
-              value={activeCustomers}
-              prefix={<UserOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Tổng doanh thu"
-              value={totalRevenue}
-              prefix="₫"
-              formatter={value => value.toLocaleString()}
-              valueStyle={{ color: "#fa8c16" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card size="small">
-            <Statistic
-              title="Tổng đơn hàng"
-              value={avgOrderValue}
-              prefix={<ShoppingOutlined />}
-              valueStyle={{ color: "#722ed1" }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
       {/* Main Content */}
       <Card
         title={

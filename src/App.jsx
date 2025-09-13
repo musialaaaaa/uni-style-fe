@@ -14,7 +14,6 @@ import OrderManagement from "./components/OrderManagement.jsx";
 import CategoryManagement from "./components/CategoryManagement.jsx";
 import SalesManagement from "./components/SalesManagement.jsx";
 import CustomerManagement from "./components/CustomerManagement.jsx";
-import StaffManagement from "./components/StaffManagement.jsx";
 import "./styles/auth.css";
 import "./styles/dark-theme.css";
 import "./styles/admin-layout.css";
@@ -207,25 +206,6 @@ const AppRoutes = () => {
           />
 
           <Route
-            path="/dashboard"
-            element={
-              isAuthenticated ? (
-                <AdminLayout
-                  currentUser={currentUser}
-                  onLogout={handleLogout}
-                  onMenuClick={handleMenuClick}
-                  currentPage="dashboard"
-                  messageApi={messageApi}
-                >
-                  <Dashboard />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
             path="/vouchers"
             element={
               isAuthenticated ? (
@@ -255,7 +235,7 @@ const AppRoutes = () => {
                   currentPage="statistics"
                   messageApi={messageApi}
                 >
-                  {renderPlaceholderPage("statistics", "Trang Thống Kê", "📈")}
+                  <Dashboard messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />

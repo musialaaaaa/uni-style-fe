@@ -6,10 +6,10 @@ const useOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [order, setCoupon] = useState();
+  const [order, setOrder] = useState();
 
   const [param, setParam] = useState({
-		discountType:null,
+    discountType: null,
     code: "",
   });
 
@@ -39,7 +39,7 @@ const useOrders = () => {
           return acc;
         }, {});
 
-      const response = await api.get("/api/orders", {
+      const response = await api.get("/order", {
         params: {
           ...cleanParam,
           page: customPageable.page,
@@ -47,9 +47,8 @@ const useOrders = () => {
           sort: customPageable.sort.join(","),
         },
       });
-
-      setOrders(response.data.data);
-      return response.data.data;
+      setOrders(response.data.data.items);
+      return response.data.data.items;
     } catch (error) {
       console.error("Error fetching orders:", error);
       setError(error);
@@ -64,11 +63,11 @@ const useOrders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get(`/orders/${ordersId}`);
+      const response = await api.get(`/order/${ordersId}`);
 
       setOrders(response.data.data);
       return response.data.data;
-    } catch (error) {	
+    } catch (error) {
       console.error("Error fetching orders:", error);
       setError(error);
       throw error;
@@ -82,10 +81,10 @@ const useOrders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.put(`/orders/${ordersId}`, payload);
-			if (response.data) {
-					getOrders();
-			}
+      const response = await api.put(`/order/${ordersId}`, payload);
+      if (response.data) {
+        getOrders();
+      }
 
       return response;
     } catch (error) {
@@ -97,19 +96,18 @@ const useOrders = () => {
     }
   }, []);
 
-    const deleteOrders = useCallback(async (ordersId) => {
+  const deleteOrders = useCallback(async ordersId => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await api.delete(`/orders/${ordersId}`);
-					getOrders();
-			
+      const response = await api.delete(`/order/${ordersId}`);
+      getOrders();
+
       return response;
     } catch (error) {
       setError(error.response.data);
       return error.response;
-
     } finally {
       setLoading(false);
     }
@@ -120,10 +118,10 @@ const useOrders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.post(`/orders`, payload);
-			if (response.data) {
-					getOrders();
-			}
+      const response = await api.post(`/order`, payload);
+      if (response.data) {
+        getOrders();
+      }
 
       return response.data;
     } catch (error) {

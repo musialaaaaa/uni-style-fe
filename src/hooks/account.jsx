@@ -47,8 +47,8 @@ const useAccount = () => {
         },
       });
 
-      setAccounts(response.data.data);
-      return response.data.data;
+      setAccounts(response.data.data.data);
+      return response.data.data.data;
     } catch (error) {
       console.error("Error fetching accounts:", error);
       setError(error);
@@ -76,7 +76,7 @@ const useAccount = () => {
     }
   }, []);
 
-    const fetchMyAccount = useCallback(async accountId => {
+  const fetchMyAccount = useCallback(async accountId => {
     try {
       setLoading(true);
       setError(null);
@@ -103,7 +103,7 @@ const useAccount = () => {
 
       return response;
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching accounts:", error);
       setError(error);
       throw error;
     } finally {
