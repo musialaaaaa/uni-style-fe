@@ -33,16 +33,9 @@ import useColor from "../hooks/color.jsx";
 const { Title, Text } = Typography;
 const { Search } = Input;
 
-const ColorManagement = () => {
+const ColorManagement = ({ messageApi }) => {
   const [colors, setColors] = useState([]);
-  const {
-    getColor,
-    createColor,
-    updateColor,
-    fetchColorById,
-    deleteColor,
-    loading,
-  } = useColor();
+  const { getColor, createColor, updateColor, fetchColorById, deleteColor, loading } = useColor();
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeletedColors, setShowDeletedColors] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -50,7 +43,6 @@ const ColorManagement = () => {
   const [viewingColor, setViewingColor] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
 
   // Filter colors based on search term and deleted status
   const filteredColors = colors.filter(color => {
@@ -325,7 +317,6 @@ const ColorManagement = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      {contextHolder}
       <Card>
         <div style={{ marginBottom: 16 }}>
           <Row justify="space-between" align="middle">
@@ -366,8 +357,8 @@ const ColorManagement = () => {
             </Col>
             <Col>
               <Text type="secondary">
-                Hiển thị {showDeletedColors ? "đã xóa" : "hoạt động"}:{" "}
-                {filteredColors.length} màu sắc
+                Hiển thị {showDeletedColors ? "đã xóa" : "hoạt động"}: {filteredColors.length} màu
+                sắc
               </Text>
             </Col>
           </Row>
@@ -504,9 +495,7 @@ const ColorManagement = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <CalendarOutlined style={{ color: "#1890ff" }} />
                       <div>
-                        <Text>
-                          {dayjs(viewingColor.createdAt).format("DD/MM/YYYY HH:mm:ss")}
-                        </Text>
+                        <Text>{dayjs(viewingColor.createdAt).format("DD/MM/YYYY HH:mm:ss")}</Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Ngày tạo</div>
                       </div>
                     </div>
@@ -527,9 +516,7 @@ const ColorManagement = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <CalendarOutlined style={{ color: "#fa8c16" }} />
                       <div>
-                        <Text>
-                          {dayjs(viewingColor.updatedAt).format("DD/MM/YYYY HH:mm:ss")}
-                        </Text>
+                        <Text>{dayjs(viewingColor.updatedAt).format("DD/MM/YYYY HH:mm:ss")}</Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Ngày cập nhật</div>
                       </div>
                     </div>

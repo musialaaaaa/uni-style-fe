@@ -28,11 +28,13 @@ const useAuth = () => {
 
       const response = await api.post("/auth/authenticate", input);
       setLoading(false);
+
       return response.data;
     } catch (error) {
       console.error("Error signing in:", error);
       setError(error);
       setLoading(false);
+      return error;
     }
   }, []);
 

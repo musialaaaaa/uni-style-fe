@@ -35,7 +35,7 @@ const { Title } = Typography;
 const { Option } = Select;
 const { Search } = Input;
 
-const VoucherManagement = () => {
+const VoucherManagement = ({ messageApi }) => {
   const [vouchers, setVouchers] = useState([]);
   const [isModalDetailVisible, setIsModalDetailVisible] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
@@ -104,7 +104,7 @@ const VoucherManagement = () => {
 
     await deleteCoupons(record.id); // Call the deleteCoupons function from the hook
 
-    message.success(`${action === "xóa" ? "Xóa" : "Khôi phục"} voucher thành công!`);
+    messageApi.success(`${action === "xóa" ? "Xóa" : "Khôi phục"} voucher thành công!`);
   };
 
   const handleSubmit = async values => {
@@ -127,7 +127,7 @@ const VoucherManagement = () => {
         };
         await updateCoupons(editingVoucher.id, updateVoucher); // Call the updateCoupons function from the hook
 
-        message.success("Cập nhật voucher thành công!");
+        messageApi.success("Cập nhật voucher thành công!");
       } else {
         // Create new voucher
         const newVoucher = {
@@ -145,11 +145,11 @@ const VoucherManagement = () => {
         };
 
         const res = await createCoupons(newVoucher); // Call the createCoupons function from the hook
-        message.success("Thêm voucher thành công!");
+        messageApi.success("Thêm voucher thành công!");
       }
       handleCloseModal();
     } catch (error) {
-      message.error("Có lỗi xảy ra!");
+      messageApi.error("Có lỗi xảy ra!");
     } finally {
     }
   };

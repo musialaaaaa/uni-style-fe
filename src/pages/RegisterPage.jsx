@@ -26,12 +26,11 @@ import { useNavigate } from "react-router-dom";
 
 const { Title, Text, Link } = Typography;
 
-const RegisterPage = ({ handleIsAuthenticated }) => {
+const RegisterPage = ({ handleIsAuthenticated, messageApi }) => {
   const { fetchRegister } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
 
   // Check password strength
@@ -117,7 +116,6 @@ const RegisterPage = ({ handleIsAuthenticated }) => {
 
   return (
     <div className="auth-container">
-      {contextHolder}
       <div className="auth-background">
         <div className="auth-overlay" />
       </div>

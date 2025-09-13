@@ -33,7 +33,7 @@ import useCategory from "../hooks/category.jsx";
 const { Title, Text } = Typography;
 const { Search } = Input;
 
-const CategoryManagement = () => {
+const CategoryManagement = ({ messageApi }) => {
   const [categories, setCategories] = useState([]);
   const {
     getCategory,
@@ -50,7 +50,6 @@ const CategoryManagement = () => {
   const [viewingCategory, setViewingCategory] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
 
   // Filter categories based on search term and deleted status
   const filteredCategories = categories.filter(category => {
@@ -325,7 +324,6 @@ const CategoryManagement = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      {contextHolder}
       <Card>
         <div style={{ marginBottom: 16 }}>
           <Row justify="space-between" align="middle">

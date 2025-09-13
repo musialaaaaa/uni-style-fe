@@ -1,17 +1,5 @@
-import React, { useState } from "react";
-import {
-  Form,
-  Input,
-  Button,
-  Card,
-  Typography,
-  Space,
-  Divider,
-  message,
-  Checkbox,
-  Row,
-  Col,
-} from "antd";
+import { useState } from "react";
+import { Form, Input, Button, Card, Typography, Divider, message, Checkbox, Row, Col } from "antd";
 import {
   UserOutlined,
   LockOutlined,
@@ -26,12 +14,11 @@ import useAuth from "../hooks/auth";
 
 const { Title, Text, Link } = Typography;
 
-const LoginPage = ({ handleIsAuthenticated, handleLoginSuccess }) => {
+const LoginPage = ({ handleIsAuthenticated, messageApi }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { fetchSignIn } = useAuth();
-  const [messageApi, contextHolder] = message.useMessage();
 
   const handleLogin = async values => {
     setLoading(true);
@@ -42,11 +29,10 @@ const LoginPage = ({ handleIsAuthenticated, handleLoginSuccess }) => {
         password: values.password,
       };
       const response = await fetchSignIn(signInInput);
+      console.log(response);
 
       if (response.message === "OK") {
         messageApi.success("Đăng nhập thành công!");
-
-        console.log(response);
 
         // Store tokens in localStorage
         localStorage.setItem("accessToken", response.data.accessToken);
@@ -90,9 +76,6 @@ const LoginPage = ({ handleIsAuthenticated, handleLoginSuccess }) => {
       <div className="auth-background">
         <div className="auth-overlay" />
       </div>
-
-      {contextHolder}
-
       <div className="auth-content">
         <Row justify="center" align="middle" style={{ minHeight: "100vh" }}>
           <Col xs={22} sm={18} md={12} lg={8} xl={6}>

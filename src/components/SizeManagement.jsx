@@ -33,16 +33,9 @@ import useSize from "../hooks/size.jsx";
 const { Title, Text } = Typography;
 const { Search } = Input;
 
-const SizeManagement = () => {
+const SizeManagement = ({ messageApi }) => {
   const [sizes, setSizes] = useState([]);
-  const {
-    getSize,
-    createSize,
-    updateSize,
-    fetchSizeById,
-    deleteSize,
-    loading,
-  } = useSize();
+  const { getSize, createSize, updateSize, fetchSizeById, deleteSize, loading } = useSize();
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeletedSizes, setShowDeletedSizes] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -50,7 +43,6 @@ const SizeManagement = () => {
   const [viewingSize, setViewingSize] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
 
   // Filter sizes based on search term and deleted status
   const filteredSizes = sizes.filter(size => {
@@ -301,7 +293,9 @@ const SizeManagement = () => {
           </Tooltip>
 
           <Popconfirm
-            title={`Bạn có chắc chắn muốn ${record.is_deleted ? "khôi phục" : "xóa"} kích thước này?`}
+            title={`Bạn có chắc chắn muốn ${
+              record.is_deleted ? "khôi phục" : "xóa"
+            } kích thước này?`}
             onConfirm={() => handleToggleDelete(record)}
             okText="Có"
             cancelText="Không"
@@ -325,7 +319,6 @@ const SizeManagement = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      {contextHolder}
       <Card>
         <div style={{ marginBottom: 16 }}>
           <Row justify="space-between" align="middle">
@@ -366,8 +359,8 @@ const SizeManagement = () => {
             </Col>
             <Col>
               <Text type="secondary">
-                Hiển thị {showDeletedSizes ? "đã xóa" : "hoạt động"}:{" "}
-                {filteredSizes.length} kích thước
+                Hiển thị {showDeletedSizes ? "đã xóa" : "hoạt động"}: {filteredSizes.length} kích
+                thước
               </Text>
             </Col>
           </Row>
@@ -504,9 +497,7 @@ const SizeManagement = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <CalendarOutlined style={{ color: "#1890ff" }} />
                       <div>
-                        <Text>
-                          {dayjs(viewingSize.createdAt).format("DD/MM/YYYY HH:mm:ss")}
-                        </Text>
+                        <Text>{dayjs(viewingSize.createdAt).format("DD/MM/YYYY HH:mm:ss")}</Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Ngày tạo</div>
                       </div>
                     </div>
@@ -527,9 +518,7 @@ const SizeManagement = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <CalendarOutlined style={{ color: "#fa8c16" }} />
                       <div>
-                        <Text>
-                          {dayjs(viewingSize.updatedAt).format("DD/MM/YYYY HH:mm:ss")}
-                        </Text>
+                        <Text>{dayjs(viewingSize.updatedAt).format("DD/MM/YYYY HH:mm:ss")}</Text>
                         <div style={{ fontSize: 12, color: "#666" }}>Ngày cập nhật</div>
                       </div>
                     </div>

@@ -39,11 +39,9 @@ import useAccount from "../hooks/account";
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-const AdminLayout = ({ children, onLogout, currentPage = "products" }) => {
+const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi }) => {
   const { changePassword } = useAuth();
   const { myAccount, fetchMyAccount, updateMyAccount } = useAccount();
-
-  const [messageApi, contextHolder] = message.useMessage();
 
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -243,7 +241,6 @@ const AdminLayout = ({ children, onLogout, currentPage = "products" }) => {
       className={`admin-layout ${isDarkMode ? "dark-theme" : "light-theme"}`}
       style={{ minHeight: "100vh" }}
     >
-      {contextHolder}
       {/* Sidebar */}
       <Sider
         trigger={null}

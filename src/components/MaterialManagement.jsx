@@ -33,7 +33,7 @@ import useMaterial from "../hooks/material.jsx";
 const { Title, Text } = Typography;
 const { Search } = Input;
 
-const MaterialManagement = () => {
+const MaterialManagement = ({ messageApi }) => {
   const [materials, setMaterials] = useState([]);
   const {
     getMaterial,
@@ -50,7 +50,6 @@ const MaterialManagement = () => {
   const [viewingMaterial, setViewingMaterial] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage();
 
   // Filter materials based on search term and deleted status
   const filteredMaterials = materials.filter(material => {
@@ -301,7 +300,9 @@ const MaterialManagement = () => {
           </Tooltip>
 
           <Popconfirm
-            title={`Bạn có chắc chắn muốn ${record.is_deleted ? "khôi phục" : "xóa"} chất liệu này?`}
+            title={`Bạn có chắc chắn muốn ${
+              record.is_deleted ? "khôi phục" : "xóa"
+            } chất liệu này?`}
             onConfirm={() => handleToggleDelete(record)}
             okText="Có"
             cancelText="Không"
@@ -325,7 +326,6 @@ const MaterialManagement = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      {contextHolder}
       <Card>
         <div style={{ marginBottom: 16 }}>
           <Row justify="space-between" align="middle">
@@ -366,8 +366,8 @@ const MaterialManagement = () => {
             </Col>
             <Col>
               <Text type="secondary">
-                Hiển thị {showDeletedMaterials ? "đã xóa" : "hoạt động"}:{" "}
-                {filteredMaterials.length} chất liệu
+                Hiển thị {showDeletedMaterials ? "đã xóa" : "hoạt động"}: {filteredMaterials.length}{" "}
+                chất liệu
               </Text>
             </Col>
           </Row>

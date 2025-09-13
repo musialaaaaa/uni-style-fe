@@ -28,7 +28,7 @@ import useProductDetail from "../hooks/productDetail.jsx";
 const { Title } = Typography;
 const { Option } = Select;
 
-const AddProductPage = ({ currentUser, onMenuClick }) => {
+const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
   const navigate = useNavigate();
   const { getColor, colors, loading: loadingColors } = useColor();
   const { fetchProducts, products, loading: loadingProducts } = useProducts();
@@ -36,8 +36,6 @@ const AddProductPage = ({ currentUser, onMenuClick }) => {
   const { getMaterial, materials, loading: loadingMaterials } = useMaterial();
   const { uploadImages, loading: loadingUpload } = useUploadImages();
   const { createProductDetail, loading: loadingProductDetail } = useProductDetail();
-  const [messageApi, contextHolder] = message.useMessage();
-
   const colorOptions = colors.map(color => ({ value: color.id, label: color.name }));
   const productOptions = products?.map(product => ({ value: product.id, label: product.name }));
   const sizeOptions = sizes?.map(size => ({ value: size.id, label: size.name }));
@@ -114,8 +112,8 @@ const AddProductPage = ({ currentUser, onMenuClick }) => {
       currentUser={currentUser}
       currentPage="add-product"
       onMenuClick={onMenuClick}
+      messageApi={messageApi}
     >
-      {contextHolder}
       {/* Breadcrumb - Đã sửa */}
       <Breadcrumb style={{ marginBottom: "16px" }}>
         <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>

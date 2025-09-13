@@ -1,6 +1,6 @@
 // App.jsx - Updated với Account Management
 import React, { useState, useEffect, useMemo } from "react";
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider, message, theme } from "antd";
 import viVN from "antd/locale/vi_VN";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import LoginPage from "./pages/LoginPage";
@@ -31,6 +31,7 @@ const AppRoutes = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [userToken, setUserToken] = useState(null); // Added for compatibility
+  const [messageApi, contextHolder] = message.useMessage();
 
   // Navigation states
   const [currentPage, setCurrentPage] = useState("dashboard"); //
@@ -73,7 +74,7 @@ const AppRoutes = () => {
     setAccessToken(token);
     setUserToken(token); // Set both tokens for compatibility
     console.log("userData on login:", userData);
-    
+
     setCurrentUser({
       username: userData?.username || "admin",
       role: userData?.role || "Administrator",
@@ -167,10 +168,7 @@ const AppRoutes = () => {
             path="/login"
             element={
               !isAuthenticated ? (
-                <LoginPage
-                  handleIsAuthenticated={handleIsAuthenticated}
-                  onLoginSuccess={handleLoginSuccess}
-                />
+                <LoginPage handleIsAuthenticated={handleIsAuthenticated} messageApi={messageApi} />
               ) : (
                 <Navigate to="/products" replace />
               )
@@ -181,7 +179,10 @@ const AppRoutes = () => {
             path="/register"
             element={
               !isAuthenticated ? (
-                <RegisterPage handleIsAuthenticated={handleIsAuthenticated} />
+                <RegisterPage
+                  handleIsAuthenticated={handleIsAuthenticated}
+                  messageApi={messageApi}
+                />
               ) : (
                 <Navigate to="/products" replace />
               )
@@ -197,6 +198,7 @@ const AppRoutes = () => {
                   currentUser={currentUser}
                   onNavigateBack={handleNavigateToProducts}
                   onMenuClick={handleMenuClick}
+                  messageApi={messageApi}
                 />
               ) : (
                 <Navigate to="/login" replace />
@@ -213,6 +215,7 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="dashboard"
+                  messageApi={messageApi}
                 >
                   <Dashboard />
                 </AdminLayout>
@@ -231,8 +234,9 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="vouchers"
+                  messageApi={messageApi}
                 >
-                  <VoucherManagement />
+                  <VoucherManagement messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -249,6 +253,7 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="statistics"
+                  messageApi={messageApi}
                 >
                   {renderPlaceholderPage("statistics", "Trang Thống Kê", "📈")}
                 </AdminLayout>
@@ -267,8 +272,9 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="categories"
+                  messageApi={messageApi}
                 >
-                  <CategoryManagement />
+                  <CategoryManagement messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -285,8 +291,9 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="sizes"
+                  messageApi={messageApi}
                 >
-                  <SizeManagement />
+                  <SizeManagement messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -303,8 +310,9 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="colors"
+                  messageApi={messageApi}
                 >
-                  <ColorManagement />
+                  <ColorManagement messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -321,8 +329,9 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="materials"
+                  messageApi={messageApi}
                 >
-                  <MaterialManagement />
+                  <MaterialManagement messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -339,8 +348,9 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="orders"
+                  messageApi={messageApi}
                 >
-                  <OrderManagement />
+                  <OrderManagement messageApi={messageApi} />
                 </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -357,11 +367,13 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="customer-management"
+                  messageApi={messageApi}
                 >
                   <CustomerManagement
                     token={accessToken}
                     userToken={userToken}
                     currentUser={currentUser}
+                    messageApi={messageApi}
                   />
                 </AdminLayout>
               ) : (
@@ -379,11 +391,13 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="sales"
+                  messageApi={messageApi}
                 >
                   <SalesManagement
                     token={accessToken}
                     userToken={userToken}
                     currentUser={currentUser}
+                    messageApi={messageApi}
                   />
                 </AdminLayout>
               ) : (
@@ -401,6 +415,7 @@ const AppRoutes = () => {
                   onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
                   currentPage="products"
+                  messageApi={messageApi}
                 >
                   <ProductList
                     token={accessToken}
@@ -410,6 +425,7 @@ const AppRoutes = () => {
                     onMenuClick={handleMenuClick}
                     currentPage="products"
                     onLogout={handleLogout}
+                    messageApi={messageApi}
                   />
                 </AdminLayout>
               ) : (
@@ -467,6 +483,7 @@ const AppRoutes = () => {
       }}
     >
       <div className="app">
+        {contextHolder}
         {/* Only show theme toggle for non-authenticated users */}
         {!isAuthenticated && (
           <div

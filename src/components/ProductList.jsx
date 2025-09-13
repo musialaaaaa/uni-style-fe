@@ -38,7 +38,7 @@ import useCategory from "../hooks/category.jsx";
 const { Title } = Typography;
 const { Option } = Select;
 
-const ProductList = ({}) => {
+const ProductList = ({ messageApi }) => {
   // Configure notification placement for center screen
   notification.config({
     placement: "top",
@@ -144,11 +144,8 @@ const ProductList = ({}) => {
         total: metadata.total || 0,
         totalPage: metadata.totalPage || 0,
       }));
-
-      message.success(`Tải thành công ${products.length} sản phẩm từ server`);
     } catch (error) {
-      console.error("Error loading products:", error);
-      message.error(`Lỗi khi tải dữ liệu: ${error.message}`);
+      messageApi.error(`Lỗi khi tải dữ liệu: ${error.message}`);
       // Fallback to mock data if API fails
     } finally {
       setApiLoading(false);
@@ -160,7 +157,6 @@ const ProductList = ({}) => {
   const loadDropdownOptions = async () => {
     setLoadingOptions(true);
     try {
-      s;
     } catch (error) {
     } finally {
     }
@@ -185,8 +181,7 @@ const ProductList = ({}) => {
       });
       setLoading(false);
     } catch (error) {
-      console.error("Error loading product detail:", error);
-      message.error(`Lỗi khi tải chi tiết sản phẩm: ${error.message}`);
+      messageApi.error(`Lỗi khi tải chi tiết sản phẩm: ${error.message}`);
       throw error;
     } finally {
       setLoading(false);
@@ -203,12 +198,12 @@ const ProductList = ({}) => {
       };
 
       const result = await updateProduct(productDetailData.id, requestBody);
-      message.success(`Lưu chi tiết sản phẩm thành công!`);
+      messageApi.success(`Lưu chi tiết sản phẩm thành công!`);
       setDetailModalVisible(true);
       return result;
     } catch (error) {
       console.error("Error saving product detail:", error);
-      message.error(`Lỗi khi lưu chi tiết sản phẩm: ${error.message}`);
+      messageApi.error(`Lỗi khi lưu chi tiết sản phẩm: ${error.message}`);
       throw error;
     }
   };
@@ -224,7 +219,7 @@ const ProductList = ({}) => {
       };
       const res = await createProduct(requestBody);
       const result = res.data;
-      message.success(`Lưu sản phẩm thành công!`);
+      messageApi.success(`Lưu sản phẩm thành công!`);
       setModalVisible(false);
       setEditingProduct(null);
       form.resetFields();
@@ -241,12 +236,12 @@ const ProductList = ({}) => {
   const deleteProductApi = async productId => {
     try {
       await deleteProduct(productId);
-      message.success("Xóa sản phẩm thành công!");
+      messageApi.success("Xóa sản phẩm thành công!");
 
       return true;
     } catch (error) {
       console.error("Error deleting product:", error);
-      message.error(`Lỗi khi xóa sản phẩm: ${error.message}`);
+      messageApi.error(`Lỗi khi xóa sản phẩm: ${error.message}`);
       throw error;
     }
   };
@@ -258,11 +253,11 @@ const ProductList = ({}) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      message.success(`Đã ${statusText} sản phẩm thành công!`);
+      messageApi.success(`Đã ${statusText} sản phẩm thành công!`);
       return true;
     } catch (error) {
       console.error("Error updating product status:", error);
-      message.error(`Lỗi khi cập nhật trạng thái: ${error.message}`);
+      messageApi.error(`Lỗi khi cập nhật trạng thái: ${error.message}`);
       throw error;
     }
   };
@@ -289,7 +284,7 @@ const ProductList = ({}) => {
   const handleEditInDetail = () => {
     setIsEditingInDetail(true);
     // Load dropdown options when entering edit mode
-    loadDropdownOptions();
+    // loadDropdownOptions();
   };
 
   const handleCancelEditInDetail = () => {
@@ -418,7 +413,7 @@ const ProductList = ({}) => {
         );
 
         // Fallback message
-        message.success({
+        messageApi.success({
           content: "✅ Cập nhật sản phẩm thành công!",
           duration: 4,
           style: {
@@ -455,7 +450,7 @@ const ProductList = ({}) => {
       );
 
       // Fallback error message
-      message.error({
+      messageApi.error({
         content: `❌ ${editingProduct ? "Cập nhật" : "Thêm"} sản phẩm thất bại!`,
         duration: 4,
         style: {
@@ -475,7 +470,6 @@ const ProductList = ({}) => {
 
   const handleDelete = async productId => {
     try {
-      console.log("Delete product:", productId);
       setLoading(true);
 
       try {
@@ -500,7 +494,6 @@ const ProductList = ({}) => {
 
   const handleStatusChange = async (productId, newStatus) => {
     try {
-      console.log("Change status:", productId, newStatus);
       const isDeleted = newStatus === "inactive";
       setLoading(true);
 
@@ -774,19 +767,29 @@ const ProductList = ({}) => {
       </Card>
 
       {/* Modal Add/Edit Simple */}
-      {
+      {modalVisible && (
         <Modal
           title={editingProduct ? "Sửa sản phẩm" : "Thêm sản phẩm mới"}
           open={modalVisible}
           onCancel={() => {
             setModalVisible(false);
             setEditingProduct(null);
-            form.resetFields();
           }}
           footer={null}
           width={600}
         >
-          <Form form={form} layout="vertical" onFinish={handleSubmit} preserve={false}>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            preserve={false}
+            initialValues={{
+              name: editingProduct ? editingProduct.name : "",
+              description: editingProduct ? editingProduct.description : "",
+              category: editingProduct ? editingProduct.category : null,
+              code: editingProduct ? editingProduct.code : "",
+            }}
+          >
             {editingProduct ? (
               <Form.Item label="Mã sản phẩm" name="code">
                 <Input
@@ -867,212 +870,219 @@ const ProductList = ({}) => {
             </Form.Item>
           </Form>
         </Modal>
-      }
+      )}
       {/* Modal Product Detail với chức năng chỉnh sửa */}
-      <Modal
-        title="Thông Tin Chi Tiết Sản Phẩm"
-        open={detailModalVisible}
-        onCancel={() => {
-          setDetailModalVisible(false);
-          setViewingProduct(null);
-          setIsEditingInDetail(false);
-        }}
-        footer={[
-          <Button key="close" onClick={() => setDetailModalVisible(false)}>
-            Đóng
-          </Button>,
-          !isEditingInDetail ? (
-            <Button key="edit" type="primary" icon={<EditOutlined />} onClick={handleEditInDetail}>
-              Sửa
-            </Button>
-          ) : (
-            <Space key="edit-actions">
-              <Button icon={<CloseOutlined />} onClick={handleCancelEditInDetail}>
-                Hủy
+      {detailModalVisible && (
+        <Modal
+          title="Thông Tin Chi Tiết Sản Phẩm"
+          open={detailModalVisible}
+          onCancel={() => {
+            setDetailModalVisible(false);
+            setViewingProduct(null);
+            setIsEditingInDetail(false);
+          }}
+          footer={[
+            <Button key="close" onClick={() => setDetailModalVisible(false)}>
+              Đóng
+            </Button>,
+            !isEditingInDetail ? (
+              <Button
+                key="edit"
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={handleEditInDetail}
+              >
+                Sửa
               </Button>
-              <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveDetailEdit}>
-                Lưu
-              </Button>
-            </Space>
-          ),
-        ]}
-        width={1000}
-        destroyOnClose
-      >
-        {viewingProduct && (
-          <Form form={detailForm} layout="vertical" disabled={!isEditingInDetail}>
-            <Row gutter={24}>
-              <Col span={8}>
-                <div style={{ textAlign: "center" }}>
-                  <img
-                    src={
-                      viewingProduct?.image || "https://via.placeholder.com/300x300?text=No+Image"
-                    }
-                    alt={viewingProduct?.name}
-                    style={{
-                      width: "100%",
-                      maxWidth: "300px",
-                      borderRadius: "8px",
-                      border: "1px solid #f0f0f0",
-                    }}
-                  />
-                  {isEditingInDetail && (
-                    <Form.Item label="URL Hình ảnh" name="image" style={{ marginTop: "16px" }}>
-                      <Input placeholder="Nhập URL hình ảnh" />
-                    </Form.Item>
-                  )}
-                </div>
-              </Col>
-              <Col span={16}>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{ color: "#1890ff", fontWeight: "bold" }}>Mã sản phẩm</span>
+            ) : (
+              <Space key="edit-actions">
+                <Button icon={<CloseOutlined />} onClick={handleCancelEditInDetail}>
+                  Hủy
+                </Button>
+                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveDetailEdit}>
+                  Lưu
+                </Button>
+              </Space>
+            ),
+          ]}
+          width={1000}
+          destroyOnClose
+        >
+          {viewingProduct && (
+            <Form form={detailForm} layout="vertical" disabled={!isEditingInDetail}>
+              <Row gutter={24}>
+                <Col span={8}>
+                  <div style={{ textAlign: "center" }}>
+                    <img
+                      src={
+                        viewingProduct?.image || "https://via.placeholder.com/300x300?text=No+Image"
                       }
-                      name="code"
-                    >
-                      <Input
-                        disabled={true}
-                        style={{
-                          color: "#1890ff",
-                          fontWeight: "bold",
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label={
-                        <span style={{ color: "#1890ff", fontWeight: "bold" }}>Tên sản phẩm</span>
-                      }
-                      name="name"
-                      rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
-                    >
-                      <Input
-                        disabled={!isEditingInDetail}
-                        style={{
-                          color: isEditingInDetail ? "#000" : "#1890ff",
-                          fontWeight: isEditingInDetail ? "normal" : "bold",
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={24}>
-                    <Form.Item
-                      label={
-                        <span style={{ color: "#1890ff", fontWeight: "bold" }}>Tên Danh Mục</span>
-                      }
-                      name="category"
-                    >
-                      <Input
-                        disabled={!isEditingInDetail}
-                        style={{
-                          color: isEditingInDetail ? "#000" : "#1890ff",
-                          fontWeight: isEditingInDetail ? "normal" : "bold",
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={24}>
-                    <Form.Item
-                      label={<span style={{ color: "#1890ff", fontWeight: "bold" }}>Mô tả</span>}
-                      name="description"
-                      rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
-                    >
-                      <Input.TextArea
-                        rows={4}
-                        disabled={!isEditingInDetail}
-                        showCount={isEditingInDetail}
-                        maxLength={500}
-                        style={{
-                          color: isEditingInDetail ? "#000" : "#1890ff",
-                          fontWeight: isEditingInDetail ? "normal" : "bold",
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={24}>
-                    {isEditingInDetail ? (
+                      alt={viewingProduct?.name}
+                      style={{
+                        width: "100%",
+                        maxWidth: "300px",
+                        borderRadius: "8px",
+                        border: "1px solid #f0f0f0",
+                      }}
+                    />
+                    {isEditingInDetail && (
+                      <Form.Item label="URL Hình ảnh" name="image" style={{ marginTop: "16px" }}>
+                        <Input placeholder="Nhập URL hình ảnh" />
+                      </Form.Item>
+                    )}
+                  </div>
+                </Col>
+                <Col span={16}>
+                  <Row gutter={[16, 16]}>
+                    <Col span={12}>
                       <Form.Item
                         label={
-                          <span style={{ color: "#1890ff", fontWeight: "bold" }}>Trạng thái</span>
+                          <span style={{ color: "#1890ff", fontWeight: "bold" }}>Mã sản phẩm</span>
                         }
-                        name="isDeleted"
-                        rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
+                        name="code"
                       >
-                        <Select style={{ width: 200 }}>
-                          <Option value={false}>
-                            <Tag color="green">Đang bán</Tag>
-                          </Option>
-                          <Option value={true}>
-                            <Tag color="red">Ngưng bán</Tag>
-                          </Option>
-                        </Select>
+                        <Input
+                          disabled={true}
+                          style={{
+                            color: "#1890ff",
+                            fontWeight: "bold",
+                          }}
+                        />
                       </Form.Item>
-                    ) : (
-                      <div style={{ marginBottom: "16px" }}>
-                        <strong style={{ color: "#1890ff" }}>Trạng thái:</strong>
-                        <div style={{ marginTop: "8px" }}>
-                          <Tag
-                            color={!viewingProduct.isDeleted ? "green" : "red"}
-                            style={{ fontSize: "14px" }}
-                          >
-                            {!viewingProduct.isDeleted ? "Đang bán" : "Ngưng bán"}
-                          </Tag>
-                        </div>
-                      </div>
-                    )}
-                  </Col>
-
-                  {!useMockData && (
-                    <Col span={24}>
-                      <div
-                        style={{
-                          marginTop: "16px",
-                          padding: "12px",
-                          background: "#f5f5f5",
-                          borderRadius: "6px",
-                          border: "1px solid #e8e8e8",
-                        }}
-                      >
-                        <Row gutter={[16, 8]}>
-                          <Col span={12}>
-                            <strong style={{ color: "#1890ff" }}>Người tạo:</strong>
-                            <span style={{ marginLeft: "8px", color: "#666" }}>
-                              {viewingProduct.createdBy}
-                            </span>
-                          </Col>
-                          <Col span={12}>
-                            <strong style={{ color: "#1890ff" }}>Ngày tạo:</strong>
-                            <span style={{ marginLeft: "8px", color: "#666" }}>
-                              {new Date(viewingProduct.createdAt).toLocaleString("vi-VN")}
-                            </span>
-                          </Col>
-                          <Col span={12}>
-                            <strong style={{ color: "#1890ff" }}>Người cập nhật:</strong>
-                            <span style={{ marginLeft: "8px", color: "#666" }}>
-                              {viewingProduct.updatedBy}
-                            </span>
-                          </Col>
-                          <Col span={12}>
-                            <strong style={{ color: "#1890ff" }}>Ngày cập nhật:</strong>
-                            <span style={{ marginLeft: "8px", color: "#666" }}>
-                              {new Date(viewingProduct.updatedAt).toLocaleString("vi-VN")}
-                            </span>
-                          </Col>
-                        </Row>
-                      </div>
                     </Col>
-                  )}
-                </Row>
-              </Col>
-            </Row>
-          </Form>
-        )}
-      </Modal>
+                    <Col span={12}>
+                      <Form.Item
+                        label={
+                          <span style={{ color: "#1890ff", fontWeight: "bold" }}>Tên sản phẩm</span>
+                        }
+                        name="name"
+                        rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
+                      >
+                        <Input
+                          disabled={!isEditingInDetail}
+                          style={{
+                            color: isEditingInDetail ? "#000" : "#1890ff",
+                            fontWeight: isEditingInDetail ? "normal" : "bold",
+                          }}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={24}>
+                      <Form.Item
+                        label={
+                          <span style={{ color: "#1890ff", fontWeight: "bold" }}>Tên Danh Mục</span>
+                        }
+                        name="category"
+                      >
+                        <Input
+                          disabled={!isEditingInDetail}
+                          style={{
+                            color: isEditingInDetail ? "#000" : "#1890ff",
+                            fontWeight: isEditingInDetail ? "normal" : "bold",
+                          }}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={24}>
+                      <Form.Item
+                        label={<span style={{ color: "#1890ff", fontWeight: "bold" }}>Mô tả</span>}
+                        name="description"
+                        rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+                      >
+                        <Input.TextArea
+                          rows={4}
+                          disabled={!isEditingInDetail}
+                          showCount={isEditingInDetail}
+                          maxLength={500}
+                          style={{
+                            color: isEditingInDetail ? "#000" : "#1890ff",
+                            fontWeight: isEditingInDetail ? "normal" : "bold",
+                          }}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col span={24}>
+                      {isEditingInDetail ? (
+                        <Form.Item
+                          label={
+                            <span style={{ color: "#1890ff", fontWeight: "bold" }}>Trạng thái</span>
+                          }
+                          name="isDeleted"
+                          rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
+                        >
+                          <Select style={{ width: 200 }}>
+                            <Option value={false}>
+                              <Tag color="green">Đang bán</Tag>
+                            </Option>
+                            <Option value={true}>
+                              <Tag color="red">Ngưng bán</Tag>
+                            </Option>
+                          </Select>
+                        </Form.Item>
+                      ) : (
+                        <div style={{ marginBottom: "16px" }}>
+                          <strong style={{ color: "#1890ff" }}>Trạng thái:</strong>
+                          <div style={{ marginTop: "8px" }}>
+                            <Tag
+                              color={!viewingProduct.isDeleted ? "green" : "red"}
+                              style={{ fontSize: "14px" }}
+                            >
+                              {!viewingProduct.isDeleted ? "Đang bán" : "Ngưng bán"}
+                            </Tag>
+                          </div>
+                        </div>
+                      )}
+                    </Col>
+
+                    {!useMockData && (
+                      <Col span={24}>
+                        <div
+                          style={{
+                            marginTop: "16px",
+                            padding: "12px",
+                            background: "#f5f5f5",
+                            borderRadius: "6px",
+                            border: "1px solid #e8e8e8",
+                          }}
+                        >
+                          <Row gutter={[16, 8]}>
+                            <Col span={12}>
+                              <strong style={{ color: "#1890ff" }}>Người tạo:</strong>
+                              <span style={{ marginLeft: "8px", color: "#666" }}>
+                                {viewingProduct.createdBy}
+                              </span>
+                            </Col>
+                            <Col span={12}>
+                              <strong style={{ color: "#1890ff" }}>Ngày tạo:</strong>
+                              <span style={{ marginLeft: "8px", color: "#666" }}>
+                                {new Date(viewingProduct.createdAt).toLocaleString("vi-VN")}
+                              </span>
+                            </Col>
+                            <Col span={12}>
+                              <strong style={{ color: "#1890ff" }}>Người cập nhật:</strong>
+                              <span style={{ marginLeft: "8px", color: "#666" }}>
+                                {viewingProduct.updatedBy}
+                              </span>
+                            </Col>
+                            <Col span={12}>
+                              <strong style={{ color: "#1890ff" }}>Ngày cập nhật:</strong>
+                              <span style={{ marginLeft: "8px", color: "#666" }}>
+                                {new Date(viewingProduct.updatedAt).toLocaleString("vi-VN")}
+                              </span>
+                            </Col>
+                          </Row>
+                        </div>
+                      </Col>
+                    )}
+                  </Row>
+                </Col>
+              </Row>
+            </Form>
+          )}
+        </Modal>
+      )}
     </div>
   );
 };
