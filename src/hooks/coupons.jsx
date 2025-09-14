@@ -9,7 +9,7 @@ const useCoupons = () => {
   const [coupon, setCoupon] = useState();
 
   const [param, setParam] = useState({
-		discountType:null,
+    discountType: null,
     code: "",
   });
 
@@ -59,6 +59,43 @@ const useCoupons = () => {
     }
   }, []);
 
+  const getApplyDiscount = useCallback(async code => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.get(`/api/coupons/apply-discount`, {
+        params: {
+          code: code,
+          total: 1,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getApplyDiscountCode = useCallback(async code => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.get(`/api/coupons/code/${code}`, {});
+      return response.data.data;
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   const fetchCouponsById = useCallback(async couponsId => {
     try {
       setLoading(true);
@@ -83,9 +120,9 @@ const useCoupons = () => {
       setError(null);
 
       const response = await api.put(`/api/coupons/${couponsId}`, payload);
-			if (response.data) {
-					getCoupons();
-			}
+      if (response.data) {
+        getCoupons();
+      }
 
       return response;
     } catch (error) {
@@ -97,19 +134,18 @@ const useCoupons = () => {
     }
   }, []);
 
-    const deleteCoupons = useCallback(async (couponsId) => {
+  const deleteCoupons = useCallback(async couponsId => {
     try {
       setLoading(true);
       setError(null);
 
       const response = await api.delete(`/api/coupons/${couponsId}`);
-					getCoupons();
-			
+      getCoupons();
+
       return response;
     } catch (error) {
       setError(error.response.data);
       return error.response;
-
     } finally {
       setLoading(false);
     }
@@ -121,9 +157,9 @@ const useCoupons = () => {
       setError(null);
 
       const response = await api.post(`/api/coupons`, payload);
-			if (response.data) {
-					getCoupons();
-			}
+      if (response.data) {
+        getCoupons();
+      }
 
       return response.data;
     } catch (error) {
@@ -134,8 +170,6 @@ const useCoupons = () => {
       setLoading(false);
     }
   }, []);
-
-  
 
   return {
     coupon,
@@ -149,6 +183,8 @@ const useCoupons = () => {
     deleteCoupons,
     setParam,
     setPageable,
+    getApplyDiscount,
+    getApplyDiscountCode,
   };
 };
 

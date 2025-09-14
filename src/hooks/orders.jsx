@@ -133,7 +133,22 @@ const useOrders = () => {
     }
   }, []);
 
-  
+  const createOrderAtStore = useCallback(async payload => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.post(`/order/at-store`, payload);
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return {
     order,
@@ -144,6 +159,7 @@ const useOrders = () => {
     fetchOrdersById,
     updateOrders,
     createOrders,
+    createOrderAtStore,
     deleteOrders,
     setParam,
     setPageable,

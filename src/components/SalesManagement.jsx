@@ -1,223 +1,72 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-    Card,
-    Row,
-    Col,
-    Button,
-    Input,
-    Select,
-    Table,
-    Space,
-    Modal,
-    Form,
-    InputNumber,
-    message,
-    Tag,
-    Avatar,
-    Divider,
-    Typography,
-    Badge,
-    List,
-    Empty,
-    Statistic,
-    Tooltip
-} from 'antd';
+  Card,
+  Row,
+  Col,
+  Button,
+  Input,
+  Select,
+  Table,
+  Space,
+  Modal,
+  Form,
+  InputNumber,
+  message,
+  Tag,
+  Avatar,
+  Divider,
+  Typography,
+  Badge,
+  List,
+  Empty,
+  Statistic,
+  Tooltip,
+} from "antd";
 import {
-    PlusOutlined,
-    SearchOutlined,
-    ShoppingCartOutlined,
-    UserOutlined,
-    DeleteOutlined,
-    ClearOutlined,
-    CreditCardOutlined,
-    GiftOutlined,
-    MinusOutlined,
-    ReloadOutlined,
-} from '@ant-design/icons';
+  PlusOutlined,
+  SearchOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+  DeleteOutlined,
+  ClearOutlined,
+  CreditCardOutlined,
+  GiftOutlined,
+  MinusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import useProductDetail from "../hooks/productDetail";
+import useCoupons from "../hooks/coupons";
+import useOrders from "../hooks/orders";
 
 const { Option } = Select;
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
 const SalesManagement = ({ currentUser, messageApi }) => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [coupons, setCoupons] = useState([]);
+  const [voucher, setVoucher] = useState("");
   const [cart, setCart] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [appliedCouponValue, setAppliedCouponValue] = useState(null);
   const [paymentModal, setPaymentModal] = useState(false);
   const [customerModal, setCustomerModal] = useState(false);
   const [paymentForm] = Form.useForm();
   const [customerForm] = Form.useForm();
+  const { productDetails, getProductDetail, loading: loadingProductDetail } = useProductDetail();
+  const { getApplyDiscountCode, loading: loadingCoupons } = useCoupons();
+  const { createOrderAtStore, loading: loadingOrders } = useOrders();
+  const [formVoucher] = Form.useForm();
 
-  // Mock data
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Áo Sơ Mi Trắng Classic",
-      category: "Áo Sơ Mi",
-      brand: "ABC Fashion",
-      price: 350000,
-      stock: 50,
-      image: "https://via.placeholder.com/60x60/4facfe/ffffff?text=AO",
-      color: "Trắng",
-      size: ["S", "M", "L", "XL"],
-      material: "Cotton",
-      description: "Áo sơ mi trắng cao cấp, phù hợp công sở",
-    },
-    {
-      id: 2,
-      name: "Quần Jean Nam Slim Fit",
-      category: "Quần Jean",
-      brand: "Denim Co",
-      price: 650000,
-      stock: 30,
-      image: "https://via.placeholder.com/60x60/52c41a/ffffff?text=QUAN",
-      color: "Xanh Navy",
-      size: ["29", "30", "31", "32", "33"],
-      material: "Denim Stretch",
-      description: "Quần jean nam dáng slim fit thời trang",
-    },
-    {
-      id: 3,
-      name: "Váy Đầm Hoa Xuân",
-      category: "Váy Đầm",
-      brand: "Pretty Girl",
-      price: 450000,
-      stock: 25,
-      image: "https://via.placeholder.com/60x60/ff7875/ffffff?text=VAY",
-      color: "Hồng Phấn",
-      size: ["S", "M", "L"],
-      material: "Vải Hoa",
-      description: "Váy đầm hoa xinh xắn cho mùa xuân",
-    },
-    {
-      id: 4,
-      name: "Túi Xách Thời Trang",
-      category: "Phụ Kiện",
-      brand: "Fashion Bag",
-      price: 280000,
-      stock: 40,
-      image: "https://via.placeholder.com/60x60/faad14/ffffff?text=TUI",
-      color: "Đen",
-      size: ["OneSize"],
-      material: "Da PU",
-      description: "Túi xách thời trang cao cấp",
-    },
-    {
-      id: 5,
-      name: "Áo Khoác Bomber",
-      category: "Áo Khoác",
-      brand: "Street Style",
-      price: 750000,
-      stock: 15,
-      image: "https://via.placeholder.com/60x60/722ed1/ffffff?text=KHOAC",
-      color: "Đen",
-      size: ["M", "L", "XL"],
-      material: "Polyester",
-      description: "Áo khoác bomber phong cách street style",
-    },
-  ];
-
-  const mockCategories = [
-    { id: 1, name: "Áo Sơ Mi" },
-    { id: 2, name: "Quần Jean" },
-    { id: 3, name: "Váy Đầm" },
-    { id: 4, name: "Phụ Kiện" },
-    { id: 5, name: "Áo Khoác" },
-  ];
-
-  const mockCustomers = [
-    {
-      id: 1,
-      name: "Nguyễn Văn An",
-      phone: "0901234567",
-      email: "vanan@email.com",
-      address: "Số 123, Phố Huế, Hai Bà Trưng, Hà Nội",
-      totalOrders: 15,
-      totalSpent: 5200000,
-    },
-    {
-      id: 2,
-      name: "Trần Thị Bình",
-      phone: "0907654321",
-      email: "thibinh@email.com",
-      address: "456 Lê Văn Sỹ, Quận 3, TP.HCM",
-      totalOrders: 8,
-      totalSpent: 2800000,
-    },
-    {
-      id: 3,
-      name: "Lê Văn Cường",
-      phone: "0903456789",
-      email: "vancuong@email.com",
-      address: "789 Nguyễn Văn Linh, Hải Châu, Đà Nẵng",
-      totalOrders: 12,
-      totalSpent: 4100000,
-    },
-  ];
-
-  const mockCoupons = [
-    {
-      id: 1,
-      code: "SAVE10",
-      discount: 10,
-      type: "percent",
-      minOrder: 500000,
-      description: "Giảm 10% đơn hàng từ 500k",
-      maxDiscount: 100000,
-    },
-    {
-      id: 2,
-      code: "FREESHIP",
-      discount: 30000,
-      type: "fixed",
-      minOrder: 300000,
-      description: "Miễn phí ship đơn từ 300k",
-    },
-    {
-      id: 3,
-      code: "NEWCUSTOMER",
-      discount: 50000,
-      type: "fixed",
-      minOrder: 200000,
-      description: "Giảm 50k khách hàng mới",
-    },
-    {
-      id: 4,
-      code: "VIP20",
-      discount: 20,
-      type: "percent",
-      minOrder: 1000000,
-      description: "Giảm 20% cho VIP (đơn từ 1tr)",
-      maxDiscount: 300000,
-    },
-  ];
+  const loading = loadingProductDetail || loadingCoupons || loadingOrders;
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setProducts(mockProducts);
-      setCategories(mockCategories);
-      setCustomers(mockCustomers);
-      setCoupons(mockCoupons);
-      messageApi.success("Dữ liệu đã được tải thành công");
-    } catch (error) {
-      messageApi.error("Không thể tải dữ liệu");
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
+    getProductDetail();
   };
 
   const addToCart = (product, selectedSize) => {
@@ -297,26 +146,24 @@ const SalesManagement = ({ currentUser, messageApi }) => {
     });
   };
 
-  const applyCoupon = couponCode => {
-    if (!couponCode.trim()) {
-      messageApi.warning("Vui lòng nhập mã giảm giá");
-      return;
-    }
-
-    const coupon = coupons.find(c => c.code.toLowerCase() === couponCode.toLowerCase());
-    if (!coupon) {
+  const applyCoupon = async values => {
+    const { couponCode } = values;
+    try {
+      if (couponCode.trim()) {
+        const res = await getApplyDiscountCode(couponCode);
+        if (res?.code === couponCode) {
+          setAppliedCoupon(res);
+          formVoucher.resetFields();
+          messageApi.success(`Áp dụng mã "${res.code}" thành công`);
+        } else {
+          messageApi.error("Mã giảm giá không hợp lệ");
+        }
+      }
+    } catch (error) {
       messageApi.error("Mã giảm giá không hợp lệ");
+      console.error("Apply coupon error:", error);
       return;
     }
-
-    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    if (subtotal < coupon.minOrder) {
-      messageApi.error(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString()}đ để sử dụng mã này`);
-      return;
-    }
-
-    setAppliedCoupon(coupon);
-    messageApi.success(`Áp dụng mã "${coupon.code}" thành công`);
   };
 
   const calculateTotal = () => {
@@ -324,13 +171,10 @@ const SalesManagement = ({ currentUser, messageApi }) => {
     let discount = 0;
 
     if (appliedCoupon) {
-      if (appliedCoupon.type === "percent") {
-        discount = subtotal * (appliedCoupon.discount / 100);
-        if (appliedCoupon.maxDiscount && discount > appliedCoupon.maxDiscount) {
-          discount = appliedCoupon.maxDiscount;
-        }
+      if (appliedCoupon.discountType === "PERCENT") {
+        discount = subtotal * (appliedCoupon.value / 100);
       } else {
-        discount = appliedCoupon.discount;
+        discount = appliedCoupon.value;
       }
     }
 
@@ -340,6 +184,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       total: Math.max(0, subtotal - discount),
     };
   };
+  console.log(cart);
 
   const handlePayment = async values => {
     if (cart.length === 0) {
@@ -353,38 +198,43 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       return;
     }
 
-    setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // await new Promise(resolve => setTimeout(resolve, 2000));
 
       const orderData = {
         orderId: `HD${Date.now()}`,
         customer: selectedCustomer,
-        items: cart,
+        cart: cart?.map(item => ({
+          productDetailId: item.id,
+          quantity: item.quantity,
+        })),
         coupon: appliedCoupon,
-        payment: {
-          ...values,
-          change: values.receivedAmount - total,
-        },
-        ...calculateTotal(),
-        createdAt: new Date().toISOString(),
-        createdBy: currentUser?.username || "Unknown",
+        paymentMethod: values.paymentMethod,
+        returnUrl: window.location.href,
+        cancelUrl: window.location.href,
+        note: values.note || "",
       };
 
-      console.log("Order created:", orderData);
+      const res = await createOrderAtStore(orderData);
 
-      clearCartAfterPayment();
-      setPaymentModal(false);
-      paymentForm.resetFields();
+      if (res) {
+        console.log(res);
+        
+        if (res.checkoutUrl && values.paymentMethod === "BANK_TRANSFER") {
+          window.open(res.checkoutUrl, "_blank");
+        }
 
-      messageApi.success(
-        `Thanh toán thành công! Tiền thừa: ${(values.receivedAmount - total).toLocaleString()}đ`,
-      );
+        clearCartAfterPayment();
+        setPaymentModal(false);
+        paymentForm.resetFields();
+
+        messageApi.success(`Thanh toán thành công`);
+      } else {
+        messageApi.error("Thanh toán thất bại");
+      }
     } catch (error) {
       messageApi.error("Thanh toán thất bại");
       console.error("Payment error:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -413,13 +263,12 @@ const SalesManagement = ({ currentUser, messageApi }) => {
     }
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = productDetails.filter(product => {
     const matchesSearch =
-      product.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchText.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+      product.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      product.brand?.toLowerCase().includes(searchText.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchText.toLowerCase());
+    return matchesSearch;
   });
 
   const productColumns = [
@@ -429,16 +278,20 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       width: 300,
       render: (_, record) => (
         <Space>
-          <Avatar src={record.image} size={50} shape="square" />
+          <Avatar src={record.image} size={40} shape="square" />
           <div>
-            <div style={{ fontWeight: 500, marginBottom: 4 }}>{record.name}</div>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {record.brand}
-            </Text>
-            <br />
-            <Text type="secondary" style={{ fontSize: 11 }}>
-              {record.description}
-            </Text>
+            <Tooltip title={record.product.name} placement="topLeft">
+              <div style={{ fontWeight: 500, marginBottom: 2 }}>
+                {record.product.name?.substring(0, 10)}
+                {record.product.name?.length > 10 ? "..." : ""}
+              </div>
+            </Tooltip>
+            <Tooltip title={record.product.description} placement="topLeft">
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {record.product.description?.substring(0, 20)}
+                {record.product.description?.length > 20 ? "..." : ""}
+              </Text>
+            </Tooltip>
           </div>
         </Space>
       ),
@@ -448,7 +301,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       dataIndex: "category",
       key: "category",
       width: 100,
-      render: category => <Tag color="blue">{category}</Tag>,
+      render: (_, record) => <Tag color="blue">{record.product.category.name}</Tag>,
     },
     {
       title: "Giá",
@@ -463,27 +316,15 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       sorter: (a, b) => a.price - b.price,
     },
     {
-      title: "Tồn kho",
-      dataIndex: "stock",
-      key: "stock",
-      width: 80,
-      render: stock => (
-        <Tag color={stock > 20 ? "green" : stock > 5 ? "orange" : stock > 0 ? "red" : "default"}>
-          {stock}
-        </Tag>
-      ),
-      sorter: (a, b) => a.stock - b.stock,
-    },
-    {
       title: "Màu/Chất liệu",
       key: "details",
       width: 120,
       render: (_, record) => (
         <div>
-          <Tag size="small">{record.color}</Tag>
+          <Tag size="small">{record.color?.name}</Tag>
           <br />
           <Text type="secondary" style={{ fontSize: 11 }}>
-            {record.material}
+            {record.material?.name}
           </Text>
         </div>
       ),
@@ -553,19 +394,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                   style={{ width: 200 }}
                   allowClear
                 />
-                <Select
-                  placeholder="Danh mục"
-                  value={selectedCategory}
-                  onChange={setSelectedCategory}
-                  style={{ width: 150 }}
-                  allowClear
-                >
-                  {categories.map(cat => (
-                    <Option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </Option>
-                  ))}
-                </Select>
+
                 <Button
                   icon={<ReloadOutlined />}
                   onClick={fetchData}
@@ -630,55 +459,6 @@ const SalesManagement = ({ currentUser, messageApi }) => {
             }}
           >
             {/* Customer Selection */}
-            <div style={{ marginBottom: 16 }}>
-              <Row gutter={8}>
-                <Col span={18}>
-                  <Select
-                    placeholder="Chọn khách hàng"
-                    value={selectedCustomer?.id}
-                    onChange={id => setSelectedCustomer(customers.find(c => c.id === id))}
-                    style={{ width: "100%" }}
-                    allowClear
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                    }
-                  >
-                    {customers.map(customer => (
-                      <Option key={customer.id} value={customer.id}>
-                        {customer.name} - {customer.phone}
-                      </Option>
-                    ))}
-                  </Select>
-                </Col>
-                <Col span={6}>
-                  <Button
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    onClick={() => setCustomerModal(true)}
-                    block
-                    title="Thêm khách hàng mới"
-                  />
-                </Col>
-              </Row>
-              {selectedCustomer && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    padding: 8,
-                    background: "#f0f9ff",
-                    borderRadius: 6,
-                    border: "1px solid #e6f7ff",
-                  }}
-                >
-                  <Text strong>{selectedCustomer.name}</Text>
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {selectedCustomer.phone} • {selectedCustomer.totalOrders} đơn
-                  </Text>
-                </div>
-              )}
-            </div>
 
             <Divider style={{ margin: "12px 0" }} />
 
@@ -770,29 +550,31 @@ const SalesManagement = ({ currentUser, messageApi }) => {
             {cart.length > 0 && (
               <>
                 <Divider style={{ margin: "12px 0" }} />
-                <div style={{ marginBottom: 16 }}>
-                  <Input.Group compact>
-                    <Input
-                      placeholder="Nhập mã giảm giá..."
-                      style={{ width: "calc(100% - 80px)" }}
-                      onPressEnter={e => {
-                        applyCoupon(e.target.value);
-                        e.target.value = "";
-                      }}
-                    />
-                    <Button
-                      type="primary"
-                      icon={<GiftOutlined />}
-                      onClick={e => {
-                        const input = e.target.parentElement.previousSibling;
-                        applyCoupon(input.value);
-                        input.value = "";
-                      }}
+                <Row gutter={8} align="middle">
+                  {!appliedCoupon && (
+                    <Form
+                      form={formVoucher}
+                      onFinish={applyCoupon}
+                      style={{ width: "100%", display: "flex" }}
                     >
-                      Áp dụng
-                    </Button>
-                  </Input.Group>
+                      <Col span={12}>
+                        <Form.Item name="couponCode">
+                          <Input className="coupon-input-field" placeholder="Nhập mã giảm giá..." />
+                        </Form.Item>
+                      </Col>
 
+                      <Col span={12} style={{ textAlign: "right" }}>
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          disabled={!!appliedCoupon}
+                          loading={loadingCoupons}
+                        >
+                          Áp dụng
+                        </Button>
+                      </Col>
+                    </Form>
+                  )}
                   {appliedCoupon && (
                     <div
                       style={{
@@ -811,10 +593,6 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                               <Text strong style={{ color: "#52c41a", fontSize: 12 }}>
                                 {appliedCoupon.code}
                               </Text>
-                              <br />
-                              <Text style={{ fontSize: 11, color: "#666" }}>
-                                {appliedCoupon.description}
-                              </Text>
                             </div>
                           </Space>
                         </Col>
@@ -831,7 +609,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                       </Row>
                     </div>
                   )}
-                </div>
+                </Row>
               </>
             )}
 
@@ -960,7 +738,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
           layout="vertical"
           onFinish={handlePayment}
           initialValues={{
-            paymentMethod: "cash",
+            paymentMethod: "CASH",
             receivedAmount: total,
           }}
         >
@@ -972,31 +750,15 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                 rules={[{ required: true, message: "Vui lòng chọn phương thức thanh toán" }]}
               >
                 <Select size="large">
-                  <Option value="cash">💵 Tiền mặt</Option>
-                  <Option value="card">💳 Thẻ tín dụng</Option>
-                  <Option value="transfer">🏦 Chuyển khoản</Option>
-                  <Option value="momo">📱 MoMo</Option>
-                  <Option value="zalopay">💙 ZaloPay</Option>
+                  <Option value="CASH">💵 Tiền mặt</Option>
+                  <Option value="BANK_TRANSFER">🏦 Chuyển khoản</Option>
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="receivedAmount"
-                label="Số tiền nhận"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số tiền nhận" },
-                  {
-                    validator: (_, value) => {
-                      if (value < total) {
-                        return Promise.reject("Số tiền nhận phải lớn hơn hoặc bằng tổng tiền");
-                      }
-                      return Promise.resolve();
-                    },
-                  },
-                ]}
-              >
+              <Form.Item name="receivedAmount" label="Số tiền nhận">
                 <InputNumber
+                  disabled
                   style={{ width: "100%" }}
                   size="large"
                   min={total}
@@ -1057,80 +819,6 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                 icon={<CreditCardOutlined />}
               >
                 Xác nhận thanh toán
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* Add Customer Modal */}
-      <Modal
-        title={
-          <Space>
-            <UserOutlined />
-            Thêm khách hàng mới
-          </Space>
-        }
-        open={customerModal}
-        onCancel={() => {
-          setCustomerModal(false);
-          customerForm.resetFields();
-        }}
-        footer={null}
-        width={500}
-      >
-        <Form form={customerForm} layout="vertical" onFinish={handleAddCustomer}>
-          <Form.Item
-            name="name"
-            label="Họ và tên"
-            rules={[
-              { required: true, message: "Vui lòng nhập họ tên" },
-              { min: 2, message: "Họ tên phải có ít nhất 2 ký tự" },
-            ]}
-          >
-            <Input placeholder="Nhập họ tên khách hàng" size="large" />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="phone"
-                label="Số điện thoại"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại" },
-                  { pattern: /^[0-9]{10,11}$/, message: "Số điện thoại không hợp lệ" },
-                ]}
-              >
-                <Input placeholder="0901234567" size="large" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[{ type: "email", message: "Email không hợp lệ" }]}
-              >
-                <Input placeholder="email@example.com" size="large" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item name="address" label="Địa chỉ">
-            <TextArea rows={3} placeholder="Nhập địa chỉ chi tiết..." showCount maxLength={200} />
-          </Form.Item>
-
-          <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-            <Space>
-              <Button
-                onClick={() => {
-                  setCustomerModal(false);
-                  customerForm.resetFields();
-                }}
-              >
-                Hủy
-              </Button>
-              <Button type="primary" htmlType="submit" size="large">
-                Thêm khách hàng
               </Button>
             </Space>
           </Form.Item>

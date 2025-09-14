@@ -10,6 +10,17 @@ const useProductDetail = () => {
 
   const [param, setParam] = useState({
     code: "",
+    name: "",
+    description: "",
+    quantity: "",
+    price: "",
+    image: "",
+    productId: "",
+    categoryId: "",
+    materialId: "",
+    brandId: "",
+    colorId: "",
+    sizeId: "",
   });
 
   const [pageable, setPageable] = useState({
@@ -18,31 +29,14 @@ const useProductDetail = () => {
     sort: ["id,asc"],
   });
 
-  const getProductDetail = useCallback(async (customParam = param, customPageable = pageable) => {
+  const getProductDetail = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Ensure all expected parameters exist, defaulting to empty strings
-      const normalizedParam = {
-        name: "",
-        ...customParam,
-      };
-
-      // Clean empty values from the param object
-      const cleanParam = Object.entries(normalizedParam)
-        .filter(([_, value]) => value !== "")
-        .reduce((acc, [key, value]) => {
-          acc[key] = value;
-          return acc;
-        }, {});
-
       const response = await api.get("/api/v1/product-details", {
         params: {
-          ...cleanParam,
-          page: customPageable.page,
-          size: customPageable.size,
-          sort: customPageable.sort.join(","),
+          ...param,
         },
       });
 
