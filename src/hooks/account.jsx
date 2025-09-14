@@ -101,7 +101,8 @@ const useAccount = () => {
 
       const response = await api.put(`/account/${accountId}`, payload);
 
-      return response;
+      getAccount();
+      return response.data;
     } catch (error) {
       console.error("Error fetching accounts:", error);
       setError(error);
@@ -111,13 +112,13 @@ const useAccount = () => {
     }
   }, []);
 
-    const updateMyAccount = useCallback(async ( payload) => {
+  const updateMyAccount = useCallback(async payload => {
     try {
       setLoading(true);
       setError(null);
 
       const response = await api.put(`/account/update-my-account`, payload);
-      if(response && response.data){
+      if (response && response.data) {
         fetchMyAccount();
       }
       return response;
@@ -130,13 +131,13 @@ const useAccount = () => {
     }
   }, []);
 
-    const deleteAccount = useCallback(async (accountId) => {
+  const deleteAccount = useCallback(async accountId => {
     try {
       setLoading(true);
       setError(null);
 
       const response = await api.delete(`/account/${accountId}`);
-      
+      getAccount();
       return response;
     } catch (error) {
       setError(error.response.data);
@@ -154,7 +155,9 @@ const useAccount = () => {
       setError(null);
 
       const response = await api.post(`/account`, payload);
-
+      if (response && response.data) {
+        getAccount();
+      }
       return response.data;
     } catch (error) {
       console.error("Error fetching accounts:", error);

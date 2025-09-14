@@ -49,7 +49,6 @@ const OrderManagement = ({ messageApi }) => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
   const { orders, loading: loadingOrders, getOrders } = useOrders();
-  console.log(orders);
 
   const loading = loadingOrders;
 
@@ -59,7 +58,7 @@ const OrderManagement = ({ messageApi }) => {
     CONFIRMED: { color: "blue", text: "Đã xác nhận", step: 1 },
     SHIPPING: { color: "cyan", text: "Đang giao hàng", step: 2 },
     COMPLETED: { color: "green", text: "Hoàn thành", step: 3 },
-    CANCELLED: { color: "red", text: "Đã hủy", step: -1 },
+    CANCELLED: { color: "red", text: "Đã hủy", step: 1 },
   };
 
   useEffect(() => {
@@ -76,11 +75,9 @@ const OrderManagement = ({ messageApi }) => {
   });
 
   const getStatusStep = status => {
-    return statusConfig[status]?.step || 0;
-  };
+    console.log(status);
 
-  const isExpired = expiredAt => {
-    return dayjs().isAfter(dayjs(expiredAt));
+    return statusConfig[status]?.step || 0;
   };
 
   const handleEdit = record => {
@@ -262,8 +259,6 @@ const OrderManagement = ({ messageApi }) => {
     },
   ];
 
-  console.log(viewingOrder);
-
   return (
     <div style={{ padding: 24 }}>
       <Card>
@@ -300,8 +295,6 @@ const OrderManagement = ({ messageApi }) => {
                 <Option value="all">Tất cả trạng thái</Option>
                 <Option value="pending">Chờ xác nhận</Option>
                 <Option value="confirmed">Đã xác nhận</Option>
-                <Option value="shipping">Đang giao hàng</Option>
-                <Option value="completed">Hoàn thành</Option>
                 <Option value="cancelled">Đã hủy</Option>
               </Select>
             </Col>
@@ -400,13 +393,16 @@ const OrderManagement = ({ messageApi }) => {
               <Title level={5}>Tiến trình đơn hàng</Title>
               <Steps
                 current={getStatusStep(viewingOrder.status)}
-                status={viewingOrder.status === "cancelled" ? "error" : "process"}
+                status={viewingOrder.status === "CANCELLED" ? "error" : "process"}
                 size="small"
               >
                 <Step title="Chờ xác nhận" description="Đơn hàng đã được tạo" />
-                <Step title="Đã xác nhận" description="Xác nhận và chuẩn bị hàng" />
-                <Step title="Đang giao hàng" description="Hàng đang được vận chuyển" />
-                <Step title="Hoàn thành" description="Giao hàng thành công" />
+                {viewingOrder.status === "CONFIRMED" && (
+                  <Step title="Đã xác nhận" description="Xác nhận và chuẩn bị hàng" />
+                )}
+                {viewingOrder.status === "CANCELLED" && (
+                  <Step title="Đã hủy" description="Đơn hàng đã bị hủy" />
+                )}
               </Steps>
             </div>
           </div>

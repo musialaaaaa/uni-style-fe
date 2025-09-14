@@ -31,10 +31,6 @@ api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
-    console.log(originalRequest);
-
-    // Nếu lỗi 401 và chưa thử refresh token
-    console.log("response error:", error.response);
 
     if ([401].includes(error.response?.status) && !originalRequest._retry) {
       originalRequest._retry = true;
