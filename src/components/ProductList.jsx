@@ -120,6 +120,7 @@ const ProductList = ({ messageApi }) => {
     name: "",
     description: "",
   });
+  console.log(pagination);
 
   // Load data from API
   const loadApiData = async () => {

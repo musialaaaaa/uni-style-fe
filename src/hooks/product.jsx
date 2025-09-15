@@ -41,14 +41,12 @@ const useProducts = () => {
           return acc;
         }, {});
 
-      const response = await api.get("/api/v1/products", {
-        params: {
-          ...cleanParam,
-          page: customPageable.page,
-          size: customPageable.size,
-          sort: customPageable.sort.join(","),
-        },
-      });
+        const response = await api.get("/api/v1/products", {
+          params: {
+            ...cleanParam,
+            sort: customPageable.sort.join(","),
+          },
+        });
 
       setProducts(response.data.data.data);
       return response.data.data;
