@@ -278,18 +278,18 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       width: 300,
       render: (_, record) => (
         <Space>
-          <Avatar src={record.image} size={40} shape="square" />
+          <Avatar src={record?.image} size={40} shape="square" />
           <div>
-            <Tooltip title={record.product.name} placement="topLeft">
+            <Tooltip title={record?.product?.name} placement="topLeft">
               <div style={{ fontWeight: 500, marginBottom: 2 }}>
-                {record.product.name?.substring(0, 10)}
-                {record.product.name?.length > 10 ? "..." : ""}
+                {record?.product?.name?.substring(0, 10)}
+                {record?.product?.name?.length > 10 ? "..." : ""}
               </div>
             </Tooltip>
-            <Tooltip title={record.product.description} placement="topLeft">
+            <Tooltip title={record?.product?.description} placement="topLeft">
               <Text type="secondary" style={{ fontSize: 12 }}>
-                {record.product.description?.substring(0, 20)}
-                {record.product.description?.length > 20 ? "..." : ""}
+                {record?.product?.description?.substring(0, 20)}
+                {record?.product?.description?.length > 20 ? "..." : ""}
               </Text>
             </Tooltip>
           </div>
@@ -301,7 +301,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       dataIndex: "category",
       key: "category",
       width: 100,
-      render: (_, record) => <Tag color="blue">{record.product.category.name}</Tag>,
+      render: (_, record) => <Tag color="blue">{record?.product?.category.name}</Tag>,
     },
     {
       title: "Giá",
@@ -321,10 +321,10 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       width: 120,
       render: (_, record) => (
         <div>
-          <Tag size="small">{record.color?.name}</Tag>
+          <Tag size="small">{record?.color?.name}</Tag>
           <br />
           <Text type="secondary" style={{ fontSize: 11 }}>
-            {record.material?.name}
+            {record?.material?.name}
           </Text>
         </div>
       ),
@@ -335,16 +335,16 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       width: 150,
       render: (_, record) => (
         <Space direction="vertical" size="small">
-          {record.size?.length > 0 && !record.size.includes("OneSize") ? (
+          {record?.size?.length > 0 && !record?.size.includes("OneSize") ? (
             <Space wrap>
-              {record.size.map(size => (
+              {record?.size.map(size => (
                 <Button
                   key={size}
                   size="small"
                   type="primary"
                   ghost
                   onClick={() => addToCart(record, size)}
-                  disabled={record.stock === 0}
+                  disabled={record?.stock === 0}
                   style={{ minWidth: 35 }}
                 >
                   {size}
@@ -357,7 +357,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
               size="small"
               icon={<PlusOutlined />}
               onClick={() => addToCart(record)}
-              disabled={record.stock === 0}
+              disabled={record?.stock === 0}
               block
             >
               Thêm vào giỏ
