@@ -402,7 +402,7 @@ const SizeManagement = ({ messageApi }) => {
             name="name"
             rules={[
               { required: true, message: "Vui lòng nhập tên kích thước!" },
-              { min: 2, message: "Tên kích thước phải có ít nhất 2 ký tự!" },
+              { min: 1, message: "Tên kích thước phải có ít nhất 1 ký tự!" },
               { max: 50, message: "Tên kích thước không được quá 50 ký tự!" },
             ]}
           >
