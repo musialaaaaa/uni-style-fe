@@ -294,12 +294,6 @@ const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi 
         {/* Header */}
         <Header className={`admin-header ${collapsed ? "collapsed" : "expanded"}`}>
           {/* Search Bar */}
-          <Space>
-            <div className="admin-search-bar">
-              <input placeholder="Tìm kiếm..." className="admin-search-input" />
-              <button className="admin-search-btn">🔍</button>
-            </div>
-          </Space>
 
           {/* User Info */}
           <div className="admin-user-menu">
