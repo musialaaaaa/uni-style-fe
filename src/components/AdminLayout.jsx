@@ -294,6 +294,9 @@ const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi 
         {/* Header */}
         <Header className={`admin-header ${collapsed ? "collapsed" : "expanded"}`}>
           {/* Search Bar */}
+          <Space>
+            <div className="admin-search-bar"></div>
+          </Space>
 
           {/* User Info */}
           <div className="admin-user-menu">
