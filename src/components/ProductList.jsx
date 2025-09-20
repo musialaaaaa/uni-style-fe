@@ -120,7 +120,6 @@ const ProductList = ({ messageApi }) => {
     name: "",
     description: "",
   });
-  console.log(pagination);
 
   // Load data from API
   const loadApiData = async () => {
@@ -216,7 +215,8 @@ const ProductList = ({ messageApi }) => {
       const requestBody = {
         name: productData.name,
         description: productData.description,
-        categoryId: "1",
+        categoryId: productData.category,
+        status: "ACTIVE",
       };
       const res = await createProduct(requestBody);
       const result = res.data;
@@ -242,30 +242,11 @@ const ProductList = ({ messageApi }) => {
       return true;
     } catch (error) {
       console.error("Error deleting product:", error);
-      messageApi.error(`Lỗi khi xóa sản phẩm: ${error.message}`);
+      messageApi.error(`Lỗi khi xóa sản phẩm: ${error.response.data.message}`);
       throw error;
     }
   };
 
-  // Update product status via API (soft delete)
-  const updateProductStatusApi = async (productId, isDeleted) => {
-    try {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      messageApi.success(`Đã ${statusText} sản phẩm thành công!`);
-      return true;
-    } catch (error) {
-      console.error("Error updating product status:", error);
-      messageApi.error(`Lỗi khi cập nhật trạng thái: ${error.message}`);
-      throw error;
-    }
-  };
-
-  // Load mock data
-
-  // Load data - always from API now
   const loadData = () => {
     loadApiData();
   };
@@ -279,87 +260,6 @@ const ProductList = ({ messageApi }) => {
       setLoading(false);
     } catch (error) {
       console.error("Error loading product detail:", error);
-    }
-  };
-
-  const handleEditInDetail = () => {
-    setIsEditingInDetail(true);
-    // Load dropdown options when entering edit mode
-    // loadDropdownOptions();
-  };
-
-  const handleCancelEditInDetail = () => {
-    setIsEditingInDetail(false);
-    // Reset form về giá trị ban đầu
-    if (viewingProduct) {
-      if (useMockData) {
-        detailForm.setFieldsValue({
-          code: viewingProduct.code,
-          name: viewingProduct.name,
-          description: viewingProduct.description,
-          createdBy: viewingProduct.createdBy,
-          createdAt: viewingProduct.createdAt,
-          updatedBy: viewingProduct.updatedBy,
-          updatedAt: viewingProduct.updatedAt,
-        });
-      } else {
-        detailForm.setFieldsValue({
-          code: viewingProduct.code,
-          name: viewingProduct.name,
-          description: viewingProduct.description,
-          quantity: viewingProduct.quantity,
-          price: viewingProduct.price,
-          image: viewingProduct.image,
-          isDeleted: viewingProduct.isDeleted,
-          productId: viewingProduct.product?.id,
-          categoryId: viewingProduct.category?.name, // Use name instead of id for category
-          materialId: viewingProduct.material?.id,
-          brandId: viewingProduct.brand?.id,
-          colorId: viewingProduct.color?.id,
-          sizeId: viewingProduct.size?.id,
-        });
-      }
-    }
-  };
-
-  const handleSaveDetailEdit = async () => {
-    try {
-      const values = await detailForm.validateFields();
-
-      setLoading(true);
-      try {
-        await saveProductDetailApi(
-          {
-            ...viewingProduct,
-            ...values,
-          },
-          true,
-        );
-
-        // Reload detail data
-        const updatedDetail = await loadProductDetailApi(viewingProduct.id);
-        setViewingProduct(updatedDetail);
-        setIsEditingInDetail(false);
-        loadData(); // Reload main product list
-
-        showSuccessNotification(
-          "🎉 Cập nhật chi tiết thành công!",
-          "Thông tin chi tiết sản phẩm đã được cập nhật thành công.",
-        );
-      } catch (error) {
-        showErrorNotification(
-          "❌ Cập nhật chi tiết thất bại!",
-          error.message || "Đã xảy ra lỗi khi cập nhật chi tiết sản phẩm. Vui lòng thử lại.",
-        );
-      }
-    } catch (error) {
-      console.error("Validation failed:", error);
-      showErrorNotification(
-        "❌ Dữ liệu không hợp lệ!",
-        "Vui lòng kiểm tra lại thông tin nhập vào và thử lại.",
-      );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -400,40 +300,22 @@ const ProductList = ({ messageApi }) => {
       setLoading(true);
 
       if (editingProduct) {
-        console.log("🔥 API: Editing existing product");
         await updateProduct(
           editingProduct.id,
           { ...editingProduct, ...values, categoryId: values.category },
           true,
         );
 
-        // Multiple notification methods to ensure visibility
-        showSuccessNotification(
-          "🎉 Cập nhật thành công!",
-          "Thông tin sản phẩm đã được cập nhật thành công.",
-        );
-
         // Fallback message
         messageApi.success({
-          content: "✅ Cập nhật sản phẩm thành công!",
-          duration: 4,
-          style: {
-            position: "fixed",
-            top: "50px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 10000,
-            fontSize: "16px",
-            fontWeight: "bold",
-          },
+          content: "Cập nhật sản phẩm thành công!",
         });
       } else {
-        const { c } = values;
-
-        console.log(values);
         const productInput = {
           name: values.name,
           description: values.description,
+          status: "ACTIVE",
+          category: values.category,
         };
         await saveProductApi(productInput);
       }
@@ -483,7 +365,7 @@ const ProductList = ({ messageApi }) => {
       } catch (error) {
         showErrorNotification(
           "❌ Xóa sản phẩm thất bại!",
-          error.message || "Đã xảy ra lỗi khi xóa sản phẩm. Vui lòng thử lại.",
+          error.response.data.message || "Đã xảy ra lỗi khi xóa sản phẩm. Vui lòng thử lại.",
         );
       }
     } catch (error) {
@@ -493,29 +375,19 @@ const ProductList = ({ messageApi }) => {
     }
   };
 
-  const handleStatusChange = async (productId, newStatus) => {
+  const handleStatusChange = async (productId, payload) => {
     try {
-      const isDeleted = newStatus === "inactive";
       setLoading(true);
-
-      try {
-        await updateProductStatusApi(productId, isDeleted);
-        const statusText = newStatus === "inactive" ? "ngưng bán" : "kích hoạt";
-        showSuccessNotification(
-          "🎉 Cập nhật trạng thái thành công!",
-          `Đã ${statusText} sản phẩm thành công.`,
-        );
+      const result = await updateProduct(productId, payload);
+      if (result) {
+        const statusText = payload.status === "INACTIVE" ? "ngưng bán" : "kích hoạt";
         loadData(); // Reload data from API
-      } catch (error) {
-        showErrorNotification(
-          "❌ Cập nhật trạng thái thất bại!",
-          error.message || "Đã xảy ra lỗi khi cập nhật trạng thái sản phẩm.",
-        );
+        messageApi.success(`🎉Đã ${statusText} sản phẩm thành công.`);
       }
     } catch (error) {
-      showErrorNotification(
-        "❌ Có lỗi xảy ra!",
-        "Đã xảy ra lỗi không mong muốn khi cập nhật trạng thái.",
+      messageApi.error(
+        `❌ Cập nhật trạng thái thất bại!`,
+        error.message || "Đã xảy ra lỗi khi cập nhật trạng thái sản phẩm.",
       );
     } finally {
       setLoading(false);
@@ -585,25 +457,33 @@ const ProductList = ({ messageApi }) => {
     },
     {
       title: "Trạng thái",
-      dataIndex: "isDeleted",
+      dataIndex: "status",
       key: "status",
       width: 150,
       align: "center",
-      render: (isDeleted, record) => (
-        <Select
-          value={!isDeleted ? "active" : "inactive"}
-          style={{ width: 120 }}
-          size="small"
-          onChange={value => handleStatusChange(record.id, value)}
-        >
-          <Option value="active">
-            <Tag color="green">Đang bán</Tag>
-          </Option>
-          <Option value="inactive">
-            <Tag color="red">Ngưng bán</Tag>
-          </Option>
-        </Select>
-      ),
+      render: (status, record) => {
+        return (
+          <Select
+            value={status}
+            style={{ width: 120 }}
+            size="small"
+            onChange={value =>
+              handleStatusChange(record.id, {
+                ...record,
+                status: value,
+                categoryId: record.category?.id,
+              })
+            }
+          >
+            <Option value="ACTIVE">
+              <Tag color="green">Đang bán</Tag>
+            </Option>
+            <Option value="INACTIVE">
+              <Tag color="red">Ngưng bán</Tag>
+            </Option>
+          </Select>
+        );
+      },
     },
     {
       title: "Hành động",
@@ -641,7 +521,6 @@ const ProductList = ({ messageApi }) => {
     loadData();
     getCategory();
   }, [pagination.current, pagination.pageSize]);
-
   return (
     <div className="product-list-container">
       {/* Breadcrumb */}
@@ -677,7 +556,7 @@ const ProductList = ({ messageApi }) => {
               style={{ background: "#52c41a", borderColor: "#52c41a" }}
               icon={<PlusOutlined />}
               onClick={() => {
-                navigate("/add-product");
+                navigate("/product-details/new");
               }}
             >
               + Thêm chi tiết
@@ -705,24 +584,6 @@ const ProductList = ({ messageApi }) => {
               />
             </Col>
             <Col xs={24} sm={12} md={6}>
-              <Input
-                placeholder="Tìm theo tên sản phẩm"
-                value={filters.name}
-                onChange={e => setFilters(prev => ({ ...prev, name: e.target.value }))}
-                allowClear
-                prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Input
-                placeholder="Tìm theo mô tả"
-                value={filters.description}
-                onChange={e => setFilters(prev => ({ ...prev, description: e.target.value }))}
-                allowClear
-                prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
               <Space>
                 <Button
                   type="primary"
@@ -731,9 +592,6 @@ const ProductList = ({ messageApi }) => {
                   loading={loading}
                 >
                   Tìm kiếm
-                </Button>
-                <Button icon={<ReloadOutlined />} onClick={handleReset} disabled={loading}>
-                  Đặt lại
                 </Button>
               </Space>
             </Col>
@@ -787,7 +645,7 @@ const ProductList = ({ messageApi }) => {
             initialValues={{
               name: editingProduct ? editingProduct.name : "",
               description: editingProduct ? editingProduct.description : "",
-              category: editingProduct ? editingProduct.category : null,
+              category: editingProduct ? editingProduct.category.id : null,
               code: editingProduct ? editingProduct.code : "",
             }}
           >
@@ -886,25 +744,6 @@ const ProductList = ({ messageApi }) => {
             <Button key="close" onClick={() => setDetailModalVisible(false)}>
               Đóng
             </Button>,
-            !isEditingInDetail ? (
-              <Button
-                key="edit"
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={handleEditInDetail}
-              >
-                Sửa
-              </Button>
-            ) : (
-              <Space key="edit-actions">
-                <Button icon={<CloseOutlined />} onClick={handleCancelEditInDetail}>
-                  Hủy
-                </Button>
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveDetailEdit}>
-                  Lưu
-                </Button>
-              </Space>
-            ),
           ]}
           width={1000}
           destroyOnClose
@@ -912,28 +751,7 @@ const ProductList = ({ messageApi }) => {
           {viewingProduct && (
             <Form form={detailForm} layout="vertical" disabled={!isEditingInDetail}>
               <Row gutter={24}>
-                <Col span={8}>
-                  <div style={{ textAlign: "center" }}>
-                    <img
-                      src={
-                        viewingProduct?.image || "https://via.placeholder.com/300x300?text=No+Image"
-                      }
-                      alt={viewingProduct?.name}
-                      style={{
-                        width: "100%",
-                        maxWidth: "300px",
-                        borderRadius: "8px",
-                        border: "1px solid #f0f0f0",
-                      }}
-                    />
-                    {isEditingInDetail && (
-                      <Form.Item label="URL Hình ảnh" name="image" style={{ marginTop: "16px" }}>
-                        <Input placeholder="Nhập URL hình ảnh" />
-                      </Form.Item>
-                    )}
-                  </div>
-                </Col>
-                <Col span={16}>
+                <Col span={24}>
                   <Row gutter={[16, 16]}>
                     <Col span={12}>
                       <Form.Item

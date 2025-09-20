@@ -17,7 +17,7 @@ import {
 } from "antd";
 import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import AdminLayout from "../components/AdminLayout.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import useColor from "../hooks/color.jsx";
 import useProducts from "../hooks/product.jsx";
 import useSize from "../hooks/size.jsx";
@@ -30,12 +30,22 @@ const { Option } = Select;
 
 const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const action = searchParams.get("action");
+
+  const { productId } = useParams();
+
   const { getColor, colors, loading: loadingColors } = useColor();
   const { fetchProducts, products, loading: loadingProducts } = useProducts();
   const { getSize, sizes, loading: loadingSizes } = useSize();
   const { getMaterial, materials, loading: loadingMaterials } = useMaterial();
   const { uploadImages, loading: loadingUpload } = useUploadImages();
-  const { createProductDetail, loading: loadingProductDetail } = useProductDetail();
+  const {
+    productDetail,
+    fetchProductDetailById,
+    createProductDetail,
+    loading: loadingProductDetail,
+  } = useProductDetail();
   const colorOptions = colors.map(color => ({ value: color.id, label: color.name }));
   const productOptions = products?.map(product => ({ value: product.id, label: product.name }));
   const sizeOptions = sizes?.map(size => ({ value: size.id, label: size.name }));
@@ -93,24 +103,44 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
     } finally {
     }
   };
-
-  const handleReset = () => {
-    form.resetFields();
-    messageApi.info("Đã reset form");
-  };
+  console.log(productDetail);
 
   useEffect(() => {
+    if (action === "edit" && productId) {
+      fetchProductDetailById(productId);
+    }
     getColor();
     fetchProducts();
     getSize();
     getMaterial();
   }, []);
 
+  useEffect(() => {
+    if (action === "edit" && productDetail) {
+      form.setFieldsValue({
+        productId: productDetail?.product.id,
+        quantity: productDetail?.quantity,
+        price: productDetail?.price,
+        productName: productDetail?.name,
+        size: productDetail?.size.id,
+        material: productDetail?.material.id,
+        color: productDetail?.color.id,
+        description: productDetail?.description,
+        images: productDetail?.images?.map((img, index) => ({
+          uid: index,
+          name: `image-${index}`,
+          status: "done",
+          url: img.url,
+        })),
+      });
+    }
+  }, [productDetail]);
+
   return (
     <AdminLayout
       onLogout={onLogoutClick}
       currentUser={currentUser}
-      currentPage="add-product"
+      currentPage="product-details"
       onMenuClick={onMenuClick}
       messageApi={messageApi}
     >
@@ -338,9 +368,6 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                     icon={<ArrowLeftOutlined />}
                   >
                     ← Quay lại
-                  </Button>
-                  <Button onClick={handleReset} disabled={loading}>
-                    Đặt lại
                   </Button>
                   <Button
                     type="primary"

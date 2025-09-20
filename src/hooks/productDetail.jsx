@@ -29,7 +29,7 @@ const useProductDetail = () => {
     sort: ["id,asc"],
   });
 
-  const getProductDetail = useCallback(async () => {
+  const getProductDetail = useCallback(async (customParam = {}) => {
     try {
       setLoading(true);
       setError(null);
@@ -37,6 +37,7 @@ const useProductDetail = () => {
       const response = await api.get("/api/v1/product-details", {
         params: {
           ...param,
+          ...customParam,
         },
       });
 
@@ -58,8 +59,8 @@ const useProductDetail = () => {
 
       const response = await api.get(`/api/v1/product-details/${productDetailId}`);
 
-      setProductDetail(response.data.data);
-      return response.data.data;
+      setProductDetail(response.data);
+      return response.data;
     } catch (error) {
       console.error("Error fetching productDetails:", error);
       setError(error);
@@ -76,6 +77,8 @@ const useProductDetail = () => {
 
       const response = await api.put(`/api/v1/product-details/${productDetailId}`, payload);
 
+      getProductDetail();
+
       return response;
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -86,13 +89,15 @@ const useProductDetail = () => {
     }
   }, []);
 
-    const deleteProductDetail = useCallback(async (productDetailId) => {
+  const deleteProductDetail = useCallback(async productDetailId => {
     try {
       setLoading(true);
       setError(null);
 
       const response = await api.delete(`/api/v1/product-details/${productDetailId}`);
-      
+
+      getProductDetail();
+
       return response;
     } catch (error) {
       setError(error.response.data);

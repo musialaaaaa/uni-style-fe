@@ -39,7 +39,7 @@ import useAccount from "../hooks/account";
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi }) => {
+const AdminLayout = ({ children, onLogout, currentPage = "statistics", messageApi }) => {
   const { changePassword } = useAuth();
   const { myAccount, fetchMyAccount, updateMyAccount } = useAccount();
 
@@ -83,6 +83,8 @@ const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi 
         return ["colors"];
       case "materials":
         return ["materials"];
+      case "product-details":
+        return ["product-details"];
       default:
         return ["product"];
     }
@@ -112,8 +114,8 @@ const AdminLayout = ({ children, onLogout, currentPage = "products", messageApi 
           label: "Danh sách",
         },
         {
-          key: "add-product",
-          label: "Thêm sản phẩm",
+          key: "product-details",
+          label: "Danh sách chi tiết sản phẩm",
         },
       ],
     },

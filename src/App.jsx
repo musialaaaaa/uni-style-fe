@@ -21,6 +21,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "r
 import SizeManagement from "./components/SizeManagement.jsx";
 import ColorManagement from "./components/ColorManagement.jsx";
 import MaterialManagement from "./components/MaterialManagement.jsx";
+import ProductDetailList from "./components/ProductDetailList.jsx";
 
 const AppRoutes = () => {
   // Auth states
@@ -103,8 +104,8 @@ const AppRoutes = () => {
     localStorage.removeItem("refreshToken");
   };
 
-  const handleNavigateToProducts = () => {
-    setCurrentPage("products");
+  const handleNavigateBackInRootPage = () => {
+    setCurrentPage("statistics");
   };
 
   const handleNavigateToAddProduct = () => {
@@ -115,49 +116,6 @@ const AppRoutes = () => {
     setIsAuthenticated(true);
   };
 
-  // Render placeholder for new pages (simplified since now wrapped in AdminLayout)
-  const renderPlaceholderPage = (pageName, pageTitle, icon) => (
-    <div
-      style={{
-        padding: "24px",
-        minHeight: "calc(100vh - 160px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          padding: "48px",
-          background: isDarkMode ? "#1f1f1f" : "#f5f5f5",
-          borderRadius: "12px",
-          border: `2px dashed ${isDarkMode ? "#434343" : "#d9d9d9"}`,
-          color: isDarkMode ? "#ffffff" : "#333333",
-        }}
-      >
-        <h2 style={{ color: "#1890ff", marginBottom: "16px" }}>
-          {icon} {pageTitle}
-        </h2>
-        <p style={{ color: isDarkMode ? "#aaa" : "#666", marginBottom: "24px" }}>
-          Trang này đang được phát triển...
-        </p>
-        <button
-          onClick={() => handleMenuClick("products")}
-          style={{
-            padding: "8px 16px",
-            background: "#1890ff",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
-        >
-          ← Quay lại danh sách sản phẩm
-        </button>
-      </div>
-    </div>
-  );
   const renderCurrentPage = () => {
     return (
       <Router>
@@ -169,7 +127,7 @@ const AppRoutes = () => {
               !isAuthenticated ? (
                 <LoginPage handleIsAuthenticated={handleIsAuthenticated} messageApi={messageApi} />
               ) : (
-                <Navigate to="/products" replace />
+                <Navigate to="/statistics" replace />
               )
             }
           />
@@ -183,22 +141,42 @@ const AppRoutes = () => {
                   messageApi={messageApi}
                 />
               ) : (
-                <Navigate to="/products" replace />
+                <Navigate to="/statistics" replace />
               )
             }
           />
 
           {/* Protected routes */}
           <Route
-            path="/add-product"
+            path="/product-details/:productId"
             element={
               isAuthenticated ? (
                 <AddProductPage
                   currentUser={currentUser}
-                  onNavigateBack={handleNavigateToProducts}
+                  currentPage="product-details"
+                  onNavigateBack={handleNavigateBackInRootPage}
                   onMenuClick={handleMenuClick}
                   messageApi={messageApi}
                 />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
+          <Route
+            path="/product-details"
+            element={
+              isAuthenticated ? (
+                <AdminLayout
+                  currentUser={currentUser}
+                  onLogout={handleLogout}
+                  onMenuClick={handleMenuClick}
+                  currentPage="product-details"
+                  messageApi={messageApi}
+                >
+                  <ProductDetailList messageApi={messageApi} />
+                </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -419,7 +397,7 @@ const AppRoutes = () => {
             path="*"
             element={
               isAuthenticated ? (
-                <Navigate to="/products" replace />
+                <Navigate to="/statistics" replace />
               ) : (
                 <Navigate to="/login" replace />
               )

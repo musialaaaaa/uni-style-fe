@@ -170,8 +170,6 @@ const Dashboard = ({ messageApi }) => {
       <div className="icon-cards-grid">
         <IconCard title="ĐƠN HÀNG" icon="🗑️" color="#fa8c16" className="icon-card-orange" />
         <IconCard title="TỔNG DOANH THU" icon="📊" color="#1890ff" className="icon-card-blue" />
-        <IconCard title="TỔNG GIÁ NHẬP" icon="💰" color="#52c41a" className="icon-card-green" />
-        <IconCard title="TỔNG GIÁ NHẬP" icon="📈" color="#eb2f96" className="icon-card-pink" />
       </div>
 
       {/* Main Content Row */}
