@@ -41,15 +41,15 @@ api.interceptors.response.use(
         if (!refreshToken) {
           return Promise.reject(error.response);
         }
-
-        const response = await axios.post(`${BASE_URL}/auth/refresh-token`, {
-          refreshToken,
-        });
+        axios.defaults.headers.common["Authorization"] = `Bearer ${refreshToken}`;
+        const response = await axios.post(`${BASE_URL}/auth/refresh-token`);
 
         // Lưu token mới
         const { token, refreshToken: newRefreshToken } = response.data;
         localStorage.setItem("accessToken", token);
         localStorage.setItem("refreshToken", newRefreshToken);
+
+        console.log("Token refreshed", token, newRefreshToken);
 
         // Cập nhật header và thử lại request ban đầu
         api.defaults.headers.Authorization = `Bearer ${token}`;

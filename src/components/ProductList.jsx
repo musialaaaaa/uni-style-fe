@@ -556,7 +556,7 @@ const ProductList = ({ messageApi }) => {
               style={{ background: "#52c41a", borderColor: "#52c41a" }}
               icon={<PlusOutlined />}
               onClick={() => {
-                navigate("/product-details/new");
+                navigate("/product-details/create");
               }}
             >
               + Thêm chi tiết

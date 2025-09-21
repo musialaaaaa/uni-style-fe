@@ -29,7 +29,6 @@ const LoginPage = ({ handleIsAuthenticated, messageApi }) => {
         password: values.password,
       };
       const response = await fetchSignIn(signInInput);
-      console.log(response);
 
       if (response.message === "OK") {
         messageApi.success("Đăng nhập thành công!");

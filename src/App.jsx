@@ -68,30 +68,6 @@ const AppRoutes = () => {
     }
   }, []);
 
-  // Updated Login success handler
-  const handleLoginSuccess = (token, userData = null) => {
-    setIsAuthenticated(true);
-    setAccessToken(token);
-    setUserToken(token); // Set both tokens for compatibility
-    console.log("userData on login:", userData);
-
-    setCurrentUser({
-      username: userData?.username || "admin",
-      role: userData?.role || "Administrator",
-    });
-    setCurrentPage("products");
-
-    // Store user data for persistence
-    localStorage.setItem("accessToken", token);
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({
-        username: userData?.username || "admin",
-        role: userData?.role || "Administrator",
-      }),
-    );
-  };
-
   // Logout handler
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -151,13 +127,15 @@ const AppRoutes = () => {
             path="/product-details/:productId"
             element={
               isAuthenticated ? (
-                <AddProductPage
+                <AdminLayout
                   currentUser={currentUser}
-                  currentPage="product-details"
-                  onNavigateBack={handleNavigateBackInRootPage}
+                  onLogout={handleLogout}
                   onMenuClick={handleMenuClick}
+                  currentPage="product-details"
                   messageApi={messageApi}
-                />
+                >
+                  <AddProductPage messageApi={messageApi} />
+                </AdminLayout>
               ) : (
                 <Navigate to="/login" replace />
               )

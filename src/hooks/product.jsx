@@ -7,6 +7,7 @@ const useProducts = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [product, setProduct] = useState();
+  const [productForShop, setProductForShop] = useState();
 
   const [param, setParam] = useState({
     code: "",
@@ -41,12 +42,12 @@ const useProducts = () => {
           return acc;
         }, {});
 
-        const response = await api.get("/api/v1/products", {
-          params: {
-            ...cleanParam,
-            sort: customPageable.sort.join(","),
-          },
-        });
+      const response = await api.get("/api/v1/products", {
+        params: {
+          ...cleanParam,
+          sort: customPageable.sort.join(","),
+        },
+      });
 
       setProducts(response.data.data.data);
       return response.data.data;
@@ -77,7 +78,25 @@ const useProducts = () => {
     }
   }, []);
 
-    const updateProduct = useCallback(async (productId, payload) => {
+  const fetchProductForShop = useCallback(async productId => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.get(`/api/v1/products/${productId}/shop`);
+
+      setProductForShop(response.data.data);
+      return response.data.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateProduct = useCallback(async (productId, payload) => {
     try {
       setLoading(true);
       setError(null);
@@ -95,8 +114,7 @@ const useProducts = () => {
     }
   }, []);
 
-
-    const createProduct = useCallback(async (payload) => {
+  const createProduct = useCallback(async payload => {
     try {
       setLoading(true);
       setError(null);
@@ -114,7 +132,7 @@ const useProducts = () => {
     }
   }, []);
 
-      const deleteProduct = useCallback(async (productId) => {
+  const deleteProduct = useCallback(async productId => {
     try {
       setLoading(true);
       setError(null);
@@ -132,13 +150,13 @@ const useProducts = () => {
     }
   }, []);
 
-
-
   return {
     products,
     product,
     loading,
     error,
+    productForShop,
+    fetchProductForShop,
     fetchProducts,
     fetchProductId,
     updateProduct,

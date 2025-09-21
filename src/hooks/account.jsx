@@ -76,7 +76,7 @@ const useAccount = () => {
     }
   }, []);
 
-  const fetchMyAccount = useCallback(async accountId => {
+  const fetchMyAccount = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);

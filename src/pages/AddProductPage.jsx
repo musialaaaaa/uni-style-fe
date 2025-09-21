@@ -28,7 +28,7 @@ import useProductDetail from "../hooks/productDetail.jsx";
 const { Title } = Typography;
 const { Option } = Select;
 
-const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
+const AddProductPage = ({ messageApi }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const action = searchParams.get("action");
@@ -36,14 +36,22 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
   const { productId } = useParams();
 
   const { getColor, colors, loading: loadingColors } = useColor();
-  const { fetchProducts, products, loading: loadingProducts } = useProducts();
+  const {
+    fetchProducts,
+    products,
+    productForShop,
+    fetchProductForShop,
+    loading: loadingProducts,
+  } = useProducts();
+
   const { getSize, sizes, loading: loadingSizes } = useSize();
   const { getMaterial, materials, loading: loadingMaterials } = useMaterial();
-  const { uploadImages, loading: loadingUpload } = useUploadImages();
+  const { uploadImages, getUrlImage, loading: loadingUpload } = useUploadImages();
   const {
     productDetail,
     fetchProductDetailById,
     createProductDetail,
+    updateProductDetail,
     loading: loadingProductDetail,
   } = useProductDetail();
   const colorOptions = colors.map(color => ({ value: color.id, label: color.name }));
@@ -64,10 +72,6 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
     loadingUpload ||
     loadingProductDetail;
 
-  const onLogoutClick = () => {
-    navigate("/login");
-  };
-
   const onNavigateBack = () => {
     navigate(-1); // Quay lại trang trước đó
   };
@@ -76,9 +80,14 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
     try {
       // Simulate API call
       //   await new Promise(resolve => setTimeout(resolve, 1500));
-      const resImg = await uploadImages(values.images?.map(file => file.originFileObj) || []);
-      const imageUrls = resImg.map(img => img.id); // Lấy URL từ phản hồi
+      const prevImageUrls = productDetail?.images?.filter(file => file.id) || [];
+      const resImg =
+        values.images?.filter(file => !file.id).length > 0 &&
+        (await uploadImages(
+          values.images?.filter(file => !file.id).map(file => file.originFileObj) || [],
+        ));
 
+      const imageUrls = prevImageUrls.concat(resImg).map(img => img.id); // Lấy URL từ phản hồi
       const payloadProdductDetail = {
         name: values.productName,
         quantity: values.quantity,
@@ -90,23 +99,33 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
         dimensions: values.dimensions,
         description: values.description,
         imageIds: imageUrls,
+        status: productDetail?.status ? productDetail?.status : "ACTIVE",
       };
+      console.log(imageUrls, payloadProdductDetail);
+
+      if (action === "edit" && productDetail) {
+        const res = await updateProductDetail(productId, payloadProdductDetail);
+        messageApi.success("Cập nhật sản phẩm thành công!");
+        form.resetFields();
+        navigate("/product-details");
+        return;
+      }
 
       const res = await createProductDetail(payloadProdductDetail);
+      console.log(res, payloadProdductDetail);
 
       messageApi.success("Thêm sản phẩm thành công!");
       form.resetFields();
 
-      navigate("/products");
+      navigate("/product-details");
     } catch (error) {
       messageApi.error("Có lỗi xảy ra khi thêm sản phẩm!");
-    } finally {
     }
   };
-  console.log(productDetail);
-
   useEffect(() => {
-    if (action === "edit" && productId) {
+    if (action !== "new" && productId !== "create") {
+      console.log("Fetch product detail by id:", productId);
+
       fetchProductDetailById(productId);
     }
     getColor();
@@ -115,8 +134,23 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
     getMaterial();
   }, []);
 
+  const color = Form.useWatch("color", form);
+
+  const handleGetImages = async fileList => {
+    const imageUrls = await Promise.all(fileList.map(file => getUrlImage(file.fileName)));
+    const images = imageUrls.map((url, index) => ({
+      uid: index,
+      name: `image-${index}`,
+      status: "done",
+      url: url,
+      id: fileList[index].id,
+    }));
+    form.setFieldsValue({ images: images });
+  };
+
   useEffect(() => {
-    if (action === "edit" && productDetail) {
+    if (action !== "new" && productDetail) {
+      handleGetImages(productDetail.images);
       form.setFieldsValue({
         productId: productDetail?.product.id,
         quantity: productDetail?.quantity,
@@ -126,29 +160,22 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
         material: productDetail?.material.id,
         color: productDetail?.color.id,
         description: productDetail?.description,
-        images: productDetail?.images?.map((img, index) => ({
-          uid: index,
-          name: `image-${index}`,
-          status: "done",
-          url: img.url,
-        })),
+      });
+    } else if (productForShop) {
+      form.setFieldsValue({
+        material: productForShop?.productDetails[0]?.material.id,
       });
     }
-  }, [productDetail]);
+  }, [productDetail, productForShop]);
 
   return (
-    <AdminLayout
-      onLogout={onLogoutClick}
-      currentUser={currentUser}
-      currentPage="product-details"
-      onMenuClick={onMenuClick}
-      messageApi={messageApi}
-    >
-      {/* Breadcrumb - Đã sửa */}
+    <>
       <Breadcrumb style={{ marginBottom: "16px" }}>
         <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>
         <Breadcrumb.Item>Quản lý sản phẩm</Breadcrumb.Item>
-        <Breadcrumb.Item>Thêm sản phẩm chi tiết</Breadcrumb.Item>
+        <Breadcrumb.Item>
+          {action === "edit" ? "Chỉnh sửa" : action === "view" ? "Xem" : "Thêm"} sản phẩm chi tiết
+        </Breadcrumb.Item>
       </Breadcrumb>
       <Spin spinning={loading} tip="Đang tải...">
         {/* Container với max-width để thu nhỏ */}
@@ -166,7 +193,8 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
               }}
             >
               <Title level={2} style={{ margin: 0, color: "#1890ff", textAlign: "center" }}>
-                Thêm Sản Phẩm Chi Tiết
+                {action === "edit" ? "Chỉnh sửa" : action === "view" ? "Xem" : "Thêm"} sản phẩm chi
+                tiết
               </Title>
 
               {/* Action Buttons */}
@@ -190,6 +218,11 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
+              initialValues={{
+                color: null,
+                size: null,
+                material: null,
+              }}
               autoComplete="off"
             >
               {/* Basic Information */}
@@ -204,7 +237,11 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                         { min: 5, message: "Tên sản phẩm phải có ít nhất 5 ký tự!" },
                       ]}
                     >
-                      <Input size="medium" placeholder="Nhập tên sản phẩm" />
+                      <Input
+                        disabled={action === "view"}
+                        size="medium"
+                        placeholder="Nhập tên sản phẩm"
+                      />
                     </Form.Item>
                   </Col>
                   <Col xs={24} sm={12}>
@@ -217,6 +254,7 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                       ]}
                     >
                       <InputNumber
+                        disabled={action === "view"}
                         size="large"
                         placeholder="Nhập số lượng"
                         style={{ width: "100%" }}
@@ -238,6 +276,7 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                     >
                       <InputNumber
                         size="large"
+                        disabled={action === "view"}
                         placeholder="Nhập giá"
                         style={{ width: "100%" }}
                         min={0}
@@ -260,8 +299,13 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                       rules={[{ required: true, message: "Vui lòng chọn sản phẩm chính!" }]}
                     >
                       <Select
+                        disabled={action === "view"}
                         placeholder="-- Chọn sản phẩm --"
                         showSearch
+                        onChange={value => {
+                          form.setFieldsValue({ material: null, color: null, size: null });
+                          value && fetchProductForShop(value);
+                        }}
                         size="large"
                         options={productOptions}
                       ></Select>
@@ -269,14 +313,18 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                   </Col>
                   <Col xs={24} sm={12}>
                     <Form.Item
-                      label="Kích thước"
-                      name="size"
-                      rules={[{ required: true, message: "Vui lòng chọn kích thước!" }]}
+                      label="Màu sắc"
+                      name="color"
+                      rules={[{ required: true, message: "Vui lòng chọn màu sắc!" }]}
                     >
                       <Select
+                        disabled={action === "view" || Form.useWatch("productId", form) == null}
+                        options={colorOptions}
+                        onChange={() => {
+                          form.setFieldsValue({ size: null });
+                        }}
                         size="large"
-                        placeholder="-- Chọn kích thước --"
-                        options={sizeOptions}
+                        placeholder="-- Chọn màu sắc --"
                       ></Select>
                     </Form.Item>
                   </Col>
@@ -288,27 +336,50 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                 <Row gutter={16}>
                   <Col xs={24} sm={12}>
                     <Form.Item
-                      label="Chất liệu"
-                      name="material"
-                      rules={[{ required: true, message: "Vui lòng chọn chất liệu!" }]}
+                      label="Kích thước"
+                      name="size"
+                      rules={[{ required: true, message: "Vui lòng chọn kích thước!" }]}
                     >
                       <Select
+                        disabled={
+                          action === "view" ||
+                          Form.useWatch("productId", form) == null ||
+                          color == null
+                        }
                         size="large"
-                        placeholder="-- Chọn chất liệu --"
-                        options={materialOptions}
+                        placeholder="-- Chọn kích thước --"
+                        options={
+                          color == null
+                            ? []
+                            : productForShop && color
+                            ? sizeOptions?.filter(
+                                size =>
+                                  ![...(productForShop?.productDetails ?? [])]
+                                    ?.filter(pd => pd.color.id === color)
+                                    ?.map(pd => pd.size.id)
+                                    ?.includes(size.value),
+                              )
+                            : sizeOptions
+                        }
                       ></Select>
                     </Form.Item>
                   </Col>
                   <Col xs={24} sm={12}>
                     <Form.Item
-                      label="Màu sắc"
-                      name="color"
-                      rules={[{ required: true, message: "Vui lòng chọn màu sắc!" }]}
+                      label="Chất liệu"
+                      name="material"
+                      rules={[{ required: true, message: "Vui lòng chọn chất liệu!" }]}
                     >
                       <Select
-                        options={colorOptions}
+                        disabled={
+                          action === "view" ||action === 'edit' ||
+                          Form.useWatch("productId", form) == null ||
+                          (productForShop?.productDetails != null &&
+                            productForShop?.productDetails.length > 0)
+                        }
                         size="large"
-                        placeholder="-- Chọn màu sắc --"
+                        placeholder="-- Chọn chất liệu --"
+                        options={materialOptions}
                       ></Select>
                     </Form.Item>
                   </Col>
@@ -328,8 +399,10 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                       }}
                     >
                       <Upload
+                        disabled={action === "view"}
                         listType="picture-card"
                         maxCount={5}
+                        multiple
                         beforeUpload={() => false}
                         accept="image/*"
                       >
@@ -351,6 +424,7 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                   ]}
                 >
                   <Input.TextArea
+                    disabled={action === "view"}
                     size="medium"
                     rows={4}
                     placeholder="Nhập mô tả chi tiết sản phẩm..."
@@ -369,25 +443,27 @@ const AddProductPage = ({ currentUser, onMenuClick, messageApi }) => {
                   >
                     ← Quay lại
                   </Button>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={loading}
-                    style={{
-                      background: "#ff8c42",
-                      borderColor: "#ff8c42",
-                      minWidth: "100px",
-                    }}
-                  >
-                    Lưu
-                  </Button>
+                  {action !== "view" && (
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={loading}
+                      style={{
+                        background: "#ff8c42",
+                        borderColor: "#ff8c42",
+                        minWidth: "100px",
+                      }}
+                    >
+                      Lưu
+                    </Button>
+                  )}
                 </Space>
               </Card>
             </Form>
           </Card>
         </div>
       </Spin>
-    </AdminLayout>
+    </>
   );
 };
 

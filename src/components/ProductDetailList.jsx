@@ -85,11 +85,15 @@ const ProductDetailList = ({ messageApi }) => {
   };
 
   const handleAdd = () => {
-    navigate("/product-details/new?action=add");
+    navigate("/product-details/create?action=new");
   };
 
   const handleEdit = product => {
     navigate(`/product-details/${product.id}?action=edit`);
+  };
+
+  const handleView = product => {
+    navigate(`/product-details/${product.id}?action=view`);
   };
 
   const handleDelete = async productId => {
@@ -107,14 +111,10 @@ const ProductDetailList = ({ messageApi }) => {
       const result = await updateProductDetail(productId, payload);
       if (result) {
         const statusText = payload.status === "INACTIVE" ? "ngưng bán" : "kích hoạt";
-        messageApi.success(
-          `🎉 Đã ${statusText} sản phẩm thành công.`,
-        );
+        messageApi.success(`🎉 Đã ${statusText} sản phẩm thành công.`);
       }
     } catch (error) {
-      messageApi.error(
-        "❌ Cập nhật trạng thái thất bại!"
-      );
+      messageApi.error("❌ Cập nhật trạng thái thất bại!");
     }
   };
   // Watch for filter changes
@@ -217,10 +217,10 @@ const ProductDetailList = ({ messageApi }) => {
             size="small"
             onChange={value =>
               handleStatusChange(record.id, {
-								name: record.name,
-								description: record.description,
-								quantity: record.quantity,
-								price: record.price,
+                name: record.name,
+                description: record.description,
+                quantity: record.quantity,
+                price: record.price,
                 status: value,
                 productId: record.product.id,
                 materialId: record.material.id,
@@ -248,7 +248,12 @@ const ProductDetailList = ({ messageApi }) => {
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Xem chi tiết">
-            <Button type="default" size="small" icon={<EyeOutlined />} onClick={() => {}} />
+            <Button
+              type="default"
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => handleView(record)}
+            />
           </Tooltip>
           <Tooltip title="Sửa">
             <Button
