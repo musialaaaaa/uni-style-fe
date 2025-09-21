@@ -7,6 +7,7 @@ const useProductDetail = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [productDetail, setProductDetail] = useState();
+  const [productDetailAssociations, setProductDetailAssociations] = useState([]);
 
   const [param, setParam] = useState({
     code: "",
@@ -52,6 +53,35 @@ const useProductDetail = () => {
     }
   }, []);
 
+  const getProductDetailAssociations = useCallback(async (customParam = {}) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await api.get("/api/v1/product-details", {
+        params: {
+          ...param,
+          ...customParam,
+        },
+      });
+      const productIds = response.data.data.map(pd => pd.product.id);
+      const uniqueProductIds = [...new Set(productIds)];
+      const associationResponses = await Promise.all(
+        uniqueProductIds.map(id => api.get(`/api/v1/products/${id}/shop`)),
+      );
+
+      const associations = associationResponses.map(res => res.data.data);
+      setProductDetailAssociations(associations);
+
+      return associations;
+    } catch (error) {
+      console.error("Error fetching productDetails:", error);
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   const fetchProductDetailById = useCallback(async productDetailId => {
     try {
       setLoading(true);
@@ -126,11 +156,10 @@ const useProductDetail = () => {
     }
   }, []);
 
-  
-
   return {
     productDetails,
     productDetail,
+    productDetailAssociations,
     loading,
     error,
     getProductDetail,
@@ -138,6 +167,7 @@ const useProductDetail = () => {
     updateProductDetail,
     createProductDetail,
     deleteProductDetail,
+    getProductDetailAssociations,
     setParam,
     setPageable,
   };

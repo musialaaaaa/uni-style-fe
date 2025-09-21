@@ -43,12 +43,10 @@ const { Step } = Steps;
 const OrderManagement = ({ messageApi }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingOrder, setEditingOrder] = useState(null);
   const [viewingOrder, setViewingOrder] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const { orders, loading: loadingOrders, getOrders } = useOrders();
+  const { orders, pageable, loading: loadingOrders, getOrders } = useOrders();
 
   const loading = loadingOrders;
 
@@ -80,60 +78,9 @@ const OrderManagement = ({ messageApi }) => {
     return statusConfig[status]?.step || 0;
   };
 
-  const handleEdit = record => {
-    form.setFieldsValue({
-      code: record.code,
-      fullName: record.fullName,
-      phoneNumber: record.phoneNumber,
-      shippingAddress: record.shippingAddress,
-      status: record.status,
-      totalAmount: record.totalAmount,
-      accountId: record.accountId,
-      couponId: record.couponId,
-    });
-  };
-
   const handleView = record => {
     setViewingOrder(record);
     setIsViewModalVisible(true);
-  };
-
-  const handleDelete = id => {
-    messageApi.success("Xóa đơn hàng thành công!");
-  };
-
-  const handleSubmit = async values => {
-    try {
-      const currentTime = dayjs().format("YYYY-MM-DD HH:mm:ss");
-
-      if (editingOrder) {
-        // Update existing order
-        messageApi.success("Cập nhật đơn hàng thành công!");
-      } else {
-        // Create new order
-        const newOrder = {
-          id: Math.max(...orders.map(o => o.id), 0) + 1,
-          ...values,
-          createdAt: currentTime,
-          createdBy: "admin",
-          updatedAt: currentTime,
-          updatedBy: "admin",
-        };
-
-        messageApi.success("Tạo đơn hàng thành công!");
-      }
-
-      handleCloseModal();
-    } catch (error) {
-      messageApi.error("Có lỗi xảy ra!");
-    } finally {
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-    setEditingOrder(null);
-    form.resetFields();
   };
 
   const handleCloseViewModal = () => {
@@ -198,14 +145,6 @@ const OrderManagement = ({ messageApi }) => {
       dataIndex: "status",
       key: "status",
       width: 130,
-      filters: [
-        { text: "Chờ xác nhận", value: "pending" },
-        { text: "Đã xác nhận", value: "confirmed" },
-        { text: "Đang giao hàng", value: "shipping" },
-        { text: "Hoàn thành", value: "completed" },
-        { text: "Đã hủy", value: "cancelled" },
-      ],
-      onFilter: (value, record) => record.status === value,
       render: status => {
         const config = statusConfig[status] || { color: "default", text: status };
         return <Tag color={config.color}>{config.text}</Tag>;
@@ -219,18 +158,17 @@ const OrderManagement = ({ messageApi }) => {
       align: "right",
       render: totalAmount => (
         <Text strong style={{ color: "#52c41a" }}>
-          {formatVietnameseCurrency(totalAmount)}
+          {totalAmount?.toLocaleString()}₫
         </Text>
       ),
-      sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
       title: "Voucher",
-      dataIndex: "couponId",
-      key: "couponId",
+      dataIndex: "coupon",
+      key: "coupon",
       width: 100,
-      render: couponId =>
-        couponId ? <Tag color="green">{couponId}</Tag> : <Text type="secondary">-</Text>,
+      render: coupon =>
+        coupon ? <Tag color="green">{coupon?.code}</Tag> : <Text type="secondary">-</Text>,
     },
     {
       title: "Ngày tạo",
@@ -293,9 +231,9 @@ const OrderManagement = ({ messageApi }) => {
                 placeholder="Lọc theo trạng thái"
               >
                 <Option value="all">Tất cả trạng thái</Option>
-                <Option value="pending">Chờ xác nhận</Option>
-                <Option value="confirmed">Đã xác nhận</Option>
-                <Option value="cancelled">Đã hủy</Option>
+                <Option value="PENDING">Chờ xác nhận</Option>
+                <Option value="CONFIRMED">Đã xác nhận</Option>
+                {/* <Option value="CANCELLED">Đã hủy</Option> */}
               </Select>
             </Col>
           </Row>
@@ -307,8 +245,12 @@ const OrderManagement = ({ messageApi }) => {
           rowKey="id"
           loading={loading}
           pagination={{
+            onChange: (page, pageSize) => {
+              getOrders({}, { ...pageable, page: page - 1, size: pageSize });
+            },
+            current: pageable.page + 1,
             total: filteredOrders.length,
-            pageSize: 10,
+            pageSize: pageable.size,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
@@ -371,8 +313,8 @@ const OrderManagement = ({ messageApi }) => {
                 {viewingOrder?.accountId ?? <Text type="secondary">Đang phát triển</Text>}
               </Descriptions.Item>
               <Descriptions.Item label="Voucher">
-                {viewingOrder?.couponId ? (
-                  <Tag color="green">{viewingOrder?.couponId}</Tag>
+                {viewingOrder?.coupon ? (
+                  <Tag color="green">{viewingOrder?.coupon?.code}</Tag>
                 ) : (
                   <Text type="secondary">Không có</Text>
                 )}

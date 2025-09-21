@@ -46,9 +46,7 @@ const SizeManagement = ({ messageApi }) => {
 
   // Filter sizes based on search term and deleted status
   const filteredSizes = sizes.filter(size => {
-    const matchesSearch =
-      size?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-      size?.createdBy?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = size?.name?.toLowerCase().includes(searchTerm?.toLowerCase()); 
     const matchesDeletedFilter = showDeletedSizes ? size.is_deleted : !size.is_deleted;
     return matchesSearch && matchesDeletedFilter;
   });

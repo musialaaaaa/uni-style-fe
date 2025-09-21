@@ -37,24 +37,25 @@ import {
 import useProductDetail from "../hooks/productDetail";
 import useCoupons from "../hooks/coupons";
 import useOrders from "../hooks/orders";
+import AvatarFile from "./AvatarFile";
 
 const { Option } = Select;
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
-const SalesManagement = ({ currentUser, messageApi }) => {
-  const [customers, setCustomers] = useState([]);
-  const [voucher, setVoucher] = useState("");
+const SalesManagement = ({ messageApi }) => {
   const [cart, setCart] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const [appliedCouponValue, setAppliedCouponValue] = useState(null);
   const [paymentModal, setPaymentModal] = useState(false);
-  const [customerModal, setCustomerModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState({});
   const [paymentForm] = Form.useForm();
-  const [customerForm] = Form.useForm();
-  const { productDetails, getProductDetail, loading: loadingProductDetail } = useProductDetail();
+  const {
+    productDetailAssociations,
+    getProductDetailAssociations,
+    loading: loadingProductDetail,
+  } = useProductDetail();
   const { getApplyDiscountCode, loading: loadingCoupons } = useCoupons();
   const { createOrderAtStore, loading: loadingOrders } = useOrders();
   const [formVoucher] = Form.useForm();
@@ -66,23 +67,11 @@ const SalesManagement = ({ currentUser, messageApi }) => {
   }, []);
 
   const fetchData = async () => {
-    getProductDetail();
+    getProductDetailAssociations();
   };
 
   const addToCart = (product, selectedSize) => {
-    if (product.stock === 0) {
-      messageApi.warning("Sản phẩm đã hết hàng");
-      return;
-    }
-
-    if (!selectedSize && product.size?.length > 0 && !product.size.includes("OneSize")) {
-      messageApi.warning("Vui lòng chọn size");
-      return;
-    }
-
-    const existingItem = cart.find(
-      item => item.id === product.id && item.selectedSize === selectedSize,
-    );
+    const existingItem = cart.find(item => item.id === product.id);
 
     if (existingItem) {
       if (existingItem.quantity >= product.stock) {
@@ -91,9 +80,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       }
       setCart(prev =>
         prev.map(item =>
-          item.id === product.id && item.selectedSize === selectedSize
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
         ),
       );
     } else {
@@ -132,18 +119,50 @@ const SalesManagement = ({ currentUser, messageApi }) => {
   };
 
   const clearCart = () => {
-    Modal.confirm({
-      title: "Xóa tất cả sản phẩm?",
-      content: "Bạn có chắc muốn xóa tất cả sản phẩm trong giỏ hàng?",
-      okText: "Xóa",
-      cancelText: "Hủy",
-      onOk: () => {
-        setCart([]);
-        setAppliedCoupon(null);
-        setSelectedCustomer(null);
-        messageApi.success("Đã xóa tất cả sản phẩm");
-      },
+    setCart([]);
+    setAppliedCoupon(null);
+    setSelectedProduct({});
+    messageApi.success("Đã xóa tất cả sản phẩm");
+  };
+
+  const handleCheckDuplicateProductColor = (array, key) => {
+    const uniqueValues = new Map();
+    const duplicates = new Map();
+
+    array.forEach(item => {
+      const value = item[key]?.id;
+      if (uniqueValues.has(value)) {
+        duplicates.set(value, item[key]);
+      } else {
+        uniqueValues.set(value, item[key]);
+      }
     });
+
+    return [...uniqueValues.values()];
+  };
+
+  const handleAvailabilitySize = (array, colorId) => {
+    const availableSizes = array.filter(item => item.color.id === colorId);
+    const result =
+      availableSizes.length > 0 ? availableSizes?.map(availableSize => availableSize.size) : null;
+    return result;
+  };
+
+  const handleGetPrice = (array, validate, verifyProduct) => {
+    if (
+      !validate ||
+      !validate?.productId ||
+      !validate?.sizeId ||
+      !validate.colorId ||
+      !verifyProduct
+    ) {
+      return 0;
+    }
+
+    const availableSizes = array.find(
+      item => item.color.id === validate.colorId && item.size.id === validate.sizeId,
+    );
+    return availableSizes?.price || 0;
   };
 
   const applyCoupon = async values => {
@@ -184,8 +203,6 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       total: Math.max(0, subtotal - discount),
     };
   };
-  console.log(cart);
-
   const handlePayment = async values => {
     if (cart.length === 0) {
       messageApi.error("Giỏ hàng trống");
@@ -208,7 +225,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
           productDetailId: item.id,
           quantity: item.quantity,
         })),
-        coupon: appliedCoupon,
+        couponId: appliedCoupon?.id,
         paymentMethod: values.paymentMethod,
         returnUrl: window.location.href,
         cancelUrl: window.location.href,
@@ -218,8 +235,6 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       const res = await createOrderAtStore(orderData);
 
       if (res) {
-        console.log(res);
-        
         if (res.checkoutUrl && values.paymentMethod === "BANK_TRANSFER") {
           window.open(res.checkoutUrl, "_blank");
         }
@@ -244,26 +259,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
     setSelectedCustomer(null);
   };
 
-  const handleAddCustomer = async values => {
-    try {
-      const newCustomer = {
-        id: Date.now(),
-        ...values,
-        totalOrders: 0,
-        totalSpent: 0,
-      };
-      setCustomers(prev => [...prev, newCustomer]);
-      setSelectedCustomer(newCustomer);
-      setCustomerModal(false);
-      customerForm.resetFields();
-      messageApi.success("Thêm khách hàng thành công");
-    } catch (error) {
-      messageApi.error("Thêm khách hàng thất bại");
-      console.error("Add customer error:", error);
-    }
-  };
-
-  const filteredProducts = productDetails.filter(product => {
+  const filteredProducts = productDetailAssociations.filter(product => {
     const matchesSearch =
       product.name?.toLowerCase().includes(searchText.toLowerCase()) ||
       product.brand?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -278,18 +274,18 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       width: 300,
       render: (_, record) => (
         <Space>
-          <Avatar src={record?.image} size={40} shape="square" />
+          <AvatarFile fileName={record?.productDetails?.[0]?.images?.[0]?.fileName} />
           <div>
-            <Tooltip title={record?.product?.name} placement="topLeft">
+            <Tooltip title={record?.name} placement="topLeft">
               <div style={{ fontWeight: 500, marginBottom: 2 }}>
-                {record?.product?.name?.substring(0, 10)}
-                {record?.product?.name?.length > 10 ? "..." : ""}
+                {record?.name?.substring(0, 10)}
+                {record?.name?.length > 10 ? "..." : ""}
               </div>
             </Tooltip>
-            <Tooltip title={record?.product?.description} placement="topLeft">
+            <Tooltip title={record?.description} placement="topLeft">
               <Text type="secondary" style={{ fontSize: 12 }}>
-                {record?.product?.description?.substring(0, 20)}
-                {record?.product?.description?.length > 20 ? "..." : ""}
+                {record?.description?.substring(0, 20)}
+                {record?.description?.length > 20 ? "..." : ""}
               </Text>
             </Tooltip>
           </div>
@@ -301,16 +297,20 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       dataIndex: "category",
       key: "category",
       width: 100,
-      render: (_, record) => <Tag color="blue">{record?.product?.category.name}</Tag>,
+      render: (_, record) => <Tag color="blue">{record?.category?.name}</Tag>,
     },
     {
       title: "Giá",
       dataIndex: "price",
       key: "price",
-      width: 100,
-      render: price => (
+      width: 200,
+      render: (_, record) => (
         <Text strong style={{ color: "#1890ff" }}>
-          {price.toLocaleString()}đ
+          {handleGetPrice(
+            record?.productDetails,
+            selectedProduct,
+            record?.id === selectedProduct?.productId,
+          ).toLocaleString() + "₫"}
         </Text>
       ),
       sorter: (a, b) => a.price - b.price,
@@ -320,53 +320,73 @@ const SalesManagement = ({ currentUser, messageApi }) => {
       key: "details",
       width: 120,
       render: (_, record) => (
-        <div>
-          <Tag size="small">{record?.color?.name}</Tag>
-          <br />
-          <Text type="secondary" style={{ fontSize: 11 }}>
-            {record?.material?.name}
-          </Text>
-        </div>
+        <Space wrap>
+          {handleCheckDuplicateProductColor(record?.productDetails, "color").map(color => (
+            <Button
+              key={color.id}
+              size="small"
+              type="primary"
+              ghost={
+                !(selectedProduct.productId === record.id && selectedProduct.colorId === color.id)
+              }
+              onClick={() => {
+                const payload = {
+                  productId: record.id,
+                  colorId: color.id,
+                };
+                setSelectedProduct(payload);
+              }}
+              disabled={record?.stock === 0}
+              style={{ minWidth: 35 }}
+            >
+              {color?.name}
+            </Button>
+          ))}
+        </Space>
       ),
     },
     {
       title: "Thao tác",
       key: "actions",
       width: 150,
-      render: (_, record) => (
-        <Space direction="vertical" size="small">
-          {record?.size?.length > 0 && !record?.size.includes("OneSize") ? (
+      render: (_, record) =>
+        selectedProduct && selectedProduct.productId === record.id ? (
+          <Space direction="vertical" size="small">
             <Space wrap>
-              {record?.size.map(size => (
+              {handleAvailabilitySize(record?.productDetails, selectedProduct.colorId).map(size => (
                 <Button
-                  key={size}
+                  key={size.id}
                   size="small"
                   type="primary"
-                  ghost
-                  onClick={() => addToCart(record, size)}
+                  ghost={
+                    !(selectedProduct.productId === record.id && selectedProduct.sizeId === size.id)
+                  }
+                  onClick={() => {
+                    const productDetailSelected = record?.productDetails?.find(
+                      detail =>
+                        detail.size.id === size.id &&
+                        detail.product.id === selectedProduct.productId &&
+                        detail.color.id === selectedProduct.colorId,
+                    );
+                    console.log(productDetailSelected);
+
+                    addToCart(productDetailSelected ?? [], productDetailSelected?.size?.name);
+                    setSelectedProduct(prev => ({ ...prev, sizeId: size.id }));
+                  }}
                   disabled={record?.stock === 0}
                   style={{ minWidth: 35 }}
                 >
-                  {size}
+                  {size?.name}
                 </Button>
               ))}
             </Space>
-          ) : (
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
-              onClick={() => addToCart(record)}
-              disabled={record?.stock === 0}
-              block
-            >
-              Thêm vào giỏ
-            </Button>
-          )}
-        </Space>
-      ),
+          </Space>
+        ) : (
+          <Space></Space>
+        ),
     },
   ];
+  console.log(cart);
 
   const { subtotal, discount, total } = calculateTotal();
 
@@ -477,20 +497,35 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                     <List.Item style={{ padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
                       <Row style={{ width: "100%" }} align="middle">
                         <Col span={3}>
-                          <Avatar src={item.image} size={28} shape="square" />
+                          <AvatarFile fileName={item?.images?.[0]?.fileName} size={28} />
                         </Col>
                         <Col span={9}>
                           <div style={{ fontSize: 12 }}>
                             <div style={{ fontWeight: 500, marginBottom: 2, lineHeight: 1.2 }}>
                               {item.name}
                             </div>
-                            {item.selectedSize && item.selectedSize !== "OneSize" && (
-                              <Tag size="small" color="blue">
-                                Size: {item.selectedSize}
-                              </Tag>
-                            )}
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 4,
+                                flexWrap: "wrap",
+                                flexDirection: "row",
+                              }}
+                            >
+                              {item.size && (
+                                <Tag size="small" color="blue">
+                                  Size: {item.size.name}
+                                </Tag>
+                              )}
+                              {item.color && (
+                                <Tag size="small" color="blue">
+                                  Color: {item.color.name}
+                                </Tag>
+                              )}
+                            </div>
+
                             <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
-                              {item.price.toLocaleString()}đ/cái
+                              {item?.price?.toLocaleString()}đ/cái
                             </div>
                           </div>
                         </Col>
@@ -526,7 +561,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                         </Col>
                         <Col span={4}>
                           <Text strong style={{ fontSize: 11, color: "#1890ff" }}>
-                            {(item.price * item.quantity).toLocaleString()}đ
+                            {(item?.price * item?.quantity)?.toLocaleString()}đ
                           </Text>
                         </Col>
                         <Col span={1}>
@@ -628,13 +663,13 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                     <Text style={{ fontSize: 13 }}>
                       Tạm tính ({cart.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm):
                     </Text>
-                    <Text style={{ fontSize: 13 }}>{subtotal.toLocaleString()}đ</Text>
+                    <Text style={{ fontSize: 13 }}>{subtotal?.toLocaleString()}đ</Text>
                   </Row>
                   {discount > 0 && (
                     <Row justify="space-between" style={{ marginBottom: 4 }}>
                       <Text style={{ fontSize: 13 }}>Giảm giá:</Text>
                       <Text style={{ color: "#52c41a", fontSize: 13 }}>
-                        -{discount.toLocaleString()}đ
+                        -{discount?.toLocaleString()}đ
                       </Text>
                     </Row>
                   )}
@@ -644,7 +679,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                       Tổng cộng:
                     </Text>
                     <Text strong style={{ fontSize: 16, color: "#ff4d4f" }}>
-                      {total.toLocaleString()}đ
+                      {total?.toLocaleString()}đ
                     </Text>
                   </Row>
                 </div>
@@ -661,7 +696,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                   disabled={cart.length === 0}
                   style={{ height: 48, fontSize: 16, fontWeight: 600 }}
                 >
-                  Thanh toán ({total.toLocaleString()}đ)
+                  Thanh toán ({total?.toLocaleString()}đ)
                 </Button>
               </>
             )}
@@ -680,6 +715,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
         open={paymentModal}
         onCancel={() => setPaymentModal(false)}
         footer={null}
+        style={{ top: 20 }}
         width={700}
       >
         <Row gutter={16} style={{ marginBottom: 24 }}>
@@ -688,7 +724,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
               title="Tạm tính"
               value={subtotal}
               suffix="đ"
-              formatter={value => value.toLocaleString()}
+              formatter={value => value?.toLocaleString()}
             />
           </Col>
           <Col span={8}>
@@ -697,7 +733,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
               value={discount}
               suffix="đ"
               valueStyle={{ color: "#52c41a" }}
-              formatter={value => value.toLocaleString()}
+              formatter={value => value?.toLocaleString()}
             />
           </Col>
           <Col span={8}>
@@ -706,7 +742,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
               value={total}
               suffix="đ"
               valueStyle={{ color: "#ff4d4f", fontSize: 20, fontWeight: "bold" }}
-              formatter={value => value.toLocaleString()}
+              formatter={value => value?.toLocaleString()}
             />
           </Col>
         </Row>
@@ -720,13 +756,11 @@ const SalesManagement = ({ currentUser, messageApi }) => {
             renderItem={item => (
               <List.Item>
                 <List.Item.Meta
-                  avatar={<Avatar src={item.image} size={40} shape="square" />}
-                  title={`${item.name} ${
-                    item.selectedSize !== "OneSize" ? `(${item.selectedSize})` : ""
-                  }`}
-                  description={`${item.quantity} x ${item.price.toLocaleString()}đ = ${(
+                  avatar={<AvatarFile fileName={item?.images?.[0]?.fileName} size={40} />}
+                  title={`${item.name} ${`(${item.size.name}/${item.color.name})`}`}
+                  description={`${item.quantity} x ${item?.price?.toLocaleString()}đ = ${(
                     item.quantity * item.price
-                  ).toLocaleString()}đ`}
+                  )?.toLocaleString()}đ`}
                 />
               </List.Item>
             )}
@@ -790,7 +824,7 @@ const SalesManagement = ({ currentUser, messageApi }) => {
                   }}
                 >
                   <Text strong style={{ fontSize: 16, color: "#1890ff" }}>
-                    Tiền thừa: {change.toLocaleString()}đ
+                    Tiền thừa: {change?.toLocaleString()}đ
                   </Text>
                 </div>
               ) : null;

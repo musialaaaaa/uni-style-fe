@@ -185,23 +185,23 @@ const VoucherManagement = ({ messageApi }) => {
       dataIndex: "discountType",
       key: "discountType",
       width: 100,
-      filters: [
-        { text: "Cố định", value: "VALUE" },
-        { text: "Phần trăm", value: "PERCENT" },
-      ],
+
       render: text => (text === "VALUE" ? "Cố định" : "Phần trăm"),
-      onFilter: (value, record) => record.discountType === value,
     },
     {
       title: "Giá trị",
       dataIndex: "value",
       key: "value",
       width: 120,
-      render: (value, record) => (
-        <span style={{ color: "#52c41a", fontWeight: 600 }}>
-          {record.discountType === "PERSON" ? `${value}%` : `${value?.toLocaleString()}đ`}
-        </span>
-      ),
+      render: (value, record) => {
+        console.log(record);
+
+        return (
+          <span style={{ color: "#52c41a", fontWeight: 600 }}>
+            {record.discountType === "PERCENT" ? `${value}%` : `${value?.toLocaleString()}đ`}
+          </span>
+        );
+      },
     },
     {
       title: "Ngày hết hạn",
@@ -347,13 +347,6 @@ const VoucherManagement = ({ messageApi }) => {
             </Col>
             <Col>
               <Space>
-                {/* <Button
-                  icon={<FilterOutlined />}
-                  onClick={() => setShowDeletedVouchers(!showDeletedVouchers)}
-                  type={showDeletedVouchers ? "primary" : "default"}
-                >
-                  {showDeletedVouchers ? "Hiện voucher hoạt động" : "Hiện voucher đã xóa"}
-                </Button> */}
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}

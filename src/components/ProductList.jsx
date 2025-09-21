@@ -433,6 +433,7 @@ const ProductList = ({ messageApi }) => {
       ellipsis: {
         showTitle: false,
       },
+      width: 150,
       render: text => (
         <Tooltip placement="topLeft" title={text}>
           <span style={{ color: "#666" }}>{text}</span>

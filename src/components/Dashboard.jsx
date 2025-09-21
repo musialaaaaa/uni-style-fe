@@ -224,7 +224,7 @@ const Dashboard = ({ messageApi }) => {
                   (order, index) =>
                     index < 3 && (
                       <tr key={index}>
-                        <td className="order-id">{order.id}</td>
+                        <td className="order-id">{order?.code}</td>
                         <td className="customer-cell">
                           <div className="customer-info">
                             <div className="customer-avatar">👤</div>
