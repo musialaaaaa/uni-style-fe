@@ -151,6 +151,24 @@ const ProductDetailList = ({ messageApi }) => {
       ),
     },
     {
+      title: "Tên SP liên kết",
+      dataIndex: "linkedName",
+      key: "linkedName",
+      width: 200,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (_, record) => {
+        const text = record.product.name;
+
+        return (
+          <Tooltip placement="topLeft" title={text}>
+            <span style={{ fontWeight: 500 }}>{text}</span>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: "Chất liệu",
       dataIndex: "material",
       key: "material",
@@ -284,6 +302,7 @@ const ProductDetailList = ({ messageApi }) => {
   useEffect(() => {
     loadData();
   }, [pagination.current, pagination.pageSize]);
+  console.log(productDetails);
 
   return (
     <div className="product-list-container">

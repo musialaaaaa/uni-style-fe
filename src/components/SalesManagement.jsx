@@ -74,7 +74,7 @@ const SalesManagement = ({ messageApi }) => {
     const existingItem = cart.find(item => item.id === product.id);
 
     if (existingItem) {
-      if (existingItem.quantity >= product.stock) {
+      if (existingItem.quantity >= product.quantity) {
         messageApi.warning("Không đủ hàng trong kho");
         return;
       }
