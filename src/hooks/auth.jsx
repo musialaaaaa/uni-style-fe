@@ -47,8 +47,10 @@ const useAuth = () => {
       
       return response.data;
     } catch (error) {
-      setError(error);
-      setLoading(false);
+            setError(error);
+            setLoading(false);
+            return error.response.data || error;
+
     }
   }, []);
 
