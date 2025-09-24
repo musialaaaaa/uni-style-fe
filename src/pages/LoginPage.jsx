@@ -135,15 +135,6 @@ const LoginPage = ({ handleIsAuthenticated, messageApi }) => {
                 </Form.Item>
 
                 <Form.Item>
-                  <div className="auth-options">
-                    <Form.Item name="remember" valuePropName="checked" noStyle>
-                      <Checkbox>Ghi nhớ đăng nhập</Checkbox>
-                    </Form.Item>
-                    <Link className="auth-forgot-link">Quên mật khẩu?</Link>
-                  </div>
-                </Form.Item>
-
-                <Form.Item>
                   <Button
                     type="primary"
                     htmlType="submit"

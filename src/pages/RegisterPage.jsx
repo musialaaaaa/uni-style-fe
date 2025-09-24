@@ -73,9 +73,7 @@ const RegisterPage = ({ handleIsAuthenticated, messageApi }) => {
       const registerInput = {
         username: values.username,
         password: values.password,
-        fullName: "Nguyen Van A",
-        email: "nguyenvana@example.com",
-        phone: "0912325123",
+        fullName: values.username,
         confirmPassword: values.confirmPassword,
       };
       const response = await fetchRegister(registerInput);
