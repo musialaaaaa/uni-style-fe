@@ -94,12 +94,6 @@ const AdminLayout = ({ children, onLogout, currentPage = "statistics", messageAp
 
   const menuItems = [
     {
-      key: "interface",
-      icon: <SettingOutlined />,
-      label: "INTERFACE",
-      type: "group",
-    },
-    {
       key: "statistics",
       icon: <DashboardOutlined />,
       label: "Thống kê",
@@ -311,9 +305,6 @@ const AdminLayout = ({ children, onLogout, currentPage = "statistics", messageAp
               title={isDarkMode ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
             />
 
-            {/* Notifications */}
-            <Button type="text" icon={<BellOutlined />} className="admin-notification-btn" />
-
             {/* User Dropdown */}
             <Dropdown
               menu={{
@@ -373,7 +364,7 @@ const AdminLayout = ({ children, onLogout, currentPage = "statistics", messageAp
               name="password"
               rules={[
                 { required: true, message: "Vui lòng nhập mật khẩu mới!" },
-                { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+                { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
               ]}
             >
               <Input.Password placeholder="Nhập mật khẩu mới" />

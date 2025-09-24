@@ -248,8 +248,7 @@ const SalesManagement = ({ messageApi }) => {
         messageApi.error("Thanh toán thất bại");
       }
     } catch (error) {
-      messageApi.error("Thanh toán thất bại");
-      console.error("Payment error:", error);
+      messageApi.error(error.response?.data?.message || "Thanh toán thất bại");
     }
   };
 

@@ -372,7 +372,8 @@ const AddProductPage = ({ messageApi }) => {
                     >
                       <Select
                         disabled={
-                          action === "view" ||action === 'edit' ||
+                          action === "view" ||
+                          action === "edit" ||
                           Form.useWatch("productId", form) == null ||
                           (productForShop?.productDetails != null &&
                             productForShop?.productDetails.length > 0)
@@ -441,7 +442,7 @@ const AddProductPage = ({ messageApi }) => {
                     onClick={() => onNavigateBack && onNavigateBack()}
                     icon={<ArrowLeftOutlined />}
                   >
-                    ← Quay lại
+                    Quay lại
                   </Button>
                   {action !== "view" && (
                     <Button

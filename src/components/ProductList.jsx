@@ -172,6 +172,7 @@ const ProductList = ({ messageApi }) => {
       detailForm.setFieldsValue({
         code: productDetail.code,
         name: productDetail.name,
+        status: productDetail.status,
         description: productDetail.description,
         category: productDetail.category?.name,
         createdBy: productDetail.createdBy,
@@ -385,10 +386,9 @@ const ProductList = ({ messageApi }) => {
         messageApi.success(`🎉Đã ${statusText} sản phẩm thành công.`);
       }
     } catch (error) {
-      messageApi.error(
-        `❌ Cập nhật trạng thái thất bại!`,
-        error.message || "Đã xảy ra lỗi khi cập nhật trạng thái sản phẩm.",
-      );
+      console.log(error);
+
+      messageApi.error(`${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -549,7 +549,7 @@ const ProductList = ({ messageApi }) => {
           </Title>
           <Space wrap>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              + Thêm sản phẩm
+              Thêm sản phẩm
             </Button>
 
             <Button
@@ -560,7 +560,7 @@ const ProductList = ({ messageApi }) => {
                 navigate("/product-details/create");
               }}
             >
-              + Thêm chi tiết
+              Thêm chi tiết
             </Button>
           </Space>
         </div>
@@ -829,14 +829,14 @@ const ProductList = ({ messageApi }) => {
                           label={
                             <span style={{ color: "#1890ff", fontWeight: "bold" }}>Trạng thái</span>
                           }
-                          name="isDeleted"
+                          name="status"
                           rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
                         >
                           <Select style={{ width: 200 }}>
-                            <Option value={false}>
+                            <Option value={"ACTIVE"}>
                               <Tag color="green">Đang bán</Tag>
                             </Option>
-                            <Option value={true}>
+                            <Option value={"INACTIVE"}>
                               <Tag color="red">Ngưng bán</Tag>
                             </Option>
                           </Select>
@@ -846,10 +846,10 @@ const ProductList = ({ messageApi }) => {
                           <strong style={{ color: "#1890ff" }}>Trạng thái:</strong>
                           <div style={{ marginTop: "8px" }}>
                             <Tag
-                              color={!viewingProduct.isDeleted ? "green" : "red"}
+                              color={!viewingProduct.status ? "green" : "red"}
                               style={{ fontSize: "14px" }}
                             >
-                              {!viewingProduct.isDeleted ? "Đang bán" : "Ngưng bán"}
+                              {!viewingProduct.status ? "Đang bán" : "Ngưng bán"}
                             </Tag>
                           </div>
                         </div>

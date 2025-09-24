@@ -44,6 +44,7 @@ const useAccount = () => {
           page: customPageable.page,
           size: customPageable.size,
           sort: customPageable.sort.join(","),
+          type: "CUSTOMER",
         },
       });
 

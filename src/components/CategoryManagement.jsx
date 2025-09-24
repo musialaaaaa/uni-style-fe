@@ -263,10 +263,7 @@ const CategoryManagement = ({ messageApi }) => {
           <div>{dayjs(text).format("DD/MM/YYYY")}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <Text type="secondary" style={{ fontSize: 11 }}>
-              {dayjs(text).format("HH:mm")}
-            </Text>
-            <Text type="secondary" style={{ fontSize: 10 }}>
-              by {record.updated_by}
+              {dayjs(text).format("HH:mm:ss")}
             </Text>
           </div>
         </div>

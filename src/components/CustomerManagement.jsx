@@ -330,7 +330,7 @@ const CustomerManagement = ({ messageApi }) => {
                     name="password"
                     rules={[
                       { required: true, message: "Vui lòng nhập mật khẩu mới!" },
-                      { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+                      { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
                     ]}
                   >
                     <Input.Password placeholder="Nhập mật khẩu mới" />
@@ -405,30 +405,6 @@ const CustomerManagement = ({ messageApi }) => {
         >
           {selectedCustomer && (
             <div>
-              <Row gutter={16} style={{ marginBottom: 16 }}>
-                <Col span={8}>
-                  <Statistic
-                    title="Tổng đơn hàng"
-                    value={selectedCustomer.total_orders}
-                    prefix={<ShoppingOutlined />}
-                  />
-                </Col>
-                <Col span={8}>
-                  <Statistic
-                    title="Tổng chi tiêu"
-                    value={selectedCustomer?.total_spent}
-                    formatter={value => `${value?.toLocaleString()}đ`}
-                  />
-                </Col>
-                <Col span={8}>
-                  <Statistic
-                    title="Điểm tích lũy"
-                    value={selectedCustomer.loyalty_points}
-                    suffix="điểm"
-                  />
-                </Col>
-              </Row>
-
               <Divider />
 
               <Row gutter={16}>

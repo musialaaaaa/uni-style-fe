@@ -331,7 +331,7 @@ const ProductDetailList = ({ messageApi }) => {
           </Title>
           <Space wrap>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              + Thêm sản phẩm chi tiết
+              Thêm sản phẩm chi tiết
             </Button>
           </Space>
         </div>

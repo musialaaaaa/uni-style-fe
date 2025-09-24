@@ -208,11 +208,6 @@ const MaterialManagement = ({ messageApi }) => {
       key: "is_deleted",
       width: 120,
       align: "center",
-      filters: [
-        { text: "Hoạt động", value: false },
-        { text: "Đã xóa", value: true },
-      ],
-      onFilter: (value, record) => record.is_deleted === value,
       render: isDeleted => (
         <Tag color={isDeleted ? "red" : "green"} style={{ fontWeight: 500 }}>
           {isDeleted ? "Đã xóa" : "Hoạt động"}
@@ -230,13 +225,6 @@ const MaterialManagement = ({ messageApi }) => {
           <Text style={{ fontSize: 13 }}>{createdBy}</Text>
         </Space>
       ),
-      filters: [
-        { text: "Admin", value: "admin" },
-        { text: "Manager", value: "manager" },
-        { text: "Staff 01", value: "staff_01" },
-        { text: "Staff 02", value: "staff_02" },
-      ],
-      onFilter: (value, record) => record.created_by === value,
     },
     {
       title: "Ngày tạo",

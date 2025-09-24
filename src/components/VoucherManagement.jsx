@@ -250,13 +250,15 @@ const VoucherManagement = ({ messageApi }) => {
       },
     },
     {
-      title: "Đã xóa",
+      title: "Trạng thái",
       dataIndex: "isDeleted",
       key: "isDeleted",
       width: 100,
       align: "center",
-      render: isDeleted => (
-        <Tag color={isDeleted ? "red" : "green"}>{isDeleted ? "Đã xóa" : "Hoạt động"}</Tag>
+      render: (_, record) => (
+        <Tag color={record.usageLimit > record.used ? "green" : "red"}>
+          {record.usageLimit > record.used ? "Hoạt động" : "Đã hết lượt"}
+        </Tag>
       ),
     },
     {
@@ -271,12 +273,6 @@ const VoucherManagement = ({ messageApi }) => {
       key: "createdAt",
       width: 140,
       render: text => dayjs(text).format("DD/MM/YYYY HH:mm"),
-    },
-    {
-      title: "Sửa cuối",
-      dataIndex: "lastEditedBy",
-      key: "lastEditedBy",
-      width: 100,
     },
     {
       title: "Ngày sửa",
@@ -477,15 +473,6 @@ const VoucherManagement = ({ messageApi }) => {
                 <InputNumber style={{ width: "100%" }} min={1} placeholder="100" />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item label="Người tạo" name="createdBy">
-                <Select>
-                  <Option value="Admin">Admin</Option>
-                  <Option value="Manager">Manager</Option>
-                  <Option value="Staff01">Staff01</Option>
-                </Select>
-              </Form.Item>
-            </Col>
           </Row>
 
           <Form.Item style={{ textAlign: "right", marginBottom: 0 }}>
@@ -569,10 +556,6 @@ const VoucherManagement = ({ messageApi }) => {
                 </Col>
                 <Col span={16}>
                   {dayjs(selectedVoucher.createdAt).format("DD/MM/YYYY HH:mm:ss")}
-                </Col>
-
-                <Col span={8}>
-                  <strong>Sửa cuối:</strong>
                 </Col>
                 <Col span={16}>{selectedVoucher.lastEditedBy}</Col>
 

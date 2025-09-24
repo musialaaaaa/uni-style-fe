@@ -233,7 +233,7 @@ const OrderManagement = ({ messageApi }) => {
                 <Option value="all">Tất cả trạng thái</Option>
                 <Option value="PENDING">Chờ xác nhận</Option>
                 <Option value="CONFIRMED">Đã xác nhận</Option>
-                {/* <Option value="CANCELLED">Đã hủy</Option> */}
+                <Option value="CANCELLED">Đã hủy</Option>
               </Select>
             </Col>
           </Row>
