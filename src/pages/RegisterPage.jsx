@@ -26,11 +26,14 @@ import { useNavigate } from "react-router-dom";
 
 const { Title, Text, Link } = Typography;
 
-const RegisterPage = ({ handleIsAuthenticated, messageApi }) => {
+const RegisterPage = ({ messageApi }) => {
+  console.log(messageApi);
+
   const { fetchRegister } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+
   const navigate = useNavigate();
 
   // Check password strength
@@ -78,35 +81,17 @@ const RegisterPage = ({ handleIsAuthenticated, messageApi }) => {
       };
       const response = await fetchRegister(registerInput);
       if (response?.message == "OK") {
-        messageApi.open({ content: "Đăng ký thành công!", type: "success" });
-        handleIsAuthenticated();
+        messageApi.success("Đăng ký thành công!");
+
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
+        navigate("/home");
       } else {
         // Handle error response from API
-        if (response.error) {
-          messageApi.open({ content: response.error, type: "error" });
-        } else if (response.messageApi && response.messageApi !== "OK") {
-          messageApi.open({ content: response.messageApi, type: "error" });
-        } else {
-          if (response.status === 409) {
-            messageApi.open({ content: "Tên đăng nhập đã tồn tại!", type: "error" });
-          } else if (response.status === 400) {
-            messageApi.open({ content: "Thông tin đăng ký không hợp lệ!", type: "error" });
-          } else {
-            messageApi.open({ content: "Đăng ký thất bại!", type: "error" });
-          }
-        }
+        messageApi.error(response.message || "Đăng ký thất bại! Vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Register error:", error);
-
-      // Handle network or parsing errors
-      if (error.name === "TypeError" && error.message.includes("fetch")) {
-        message.error("Không thể kết nối đến máy chủ!");
-      } else {
-        message.error("Đăng ký thất bại! Vui lòng thử lại.");
-      }
+      messageApi.error("Đăng ký thất bại! Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
