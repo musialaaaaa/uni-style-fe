@@ -357,14 +357,7 @@ const SizeManagement = ({ messageApi }) => {
           dataSource={filteredSizes}
           rowKey="id"
           loading={loading}
-          pagination={{
-            total: filteredSizes.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} kích thước`,
-          }}
+          pagination={false}
           scroll={{ x: 900 }}
           size="small"
           rowClassName={record => (record.is_deleted ? "deleted-row" : "")}

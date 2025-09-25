@@ -56,6 +56,7 @@ const SalesManagement = ({ messageApi }) => {
     getProductDetailAssociations,
     loading: loadingProductDetail,
   } = useProductDetail();
+
   const { getApplyDiscountCode, loading: loadingCoupons } = useCoupons();
   const { createOrderAtStore, loading: loadingOrders } = useOrders();
   const [formVoucher] = Form.useForm();
@@ -432,12 +433,7 @@ const SalesManagement = ({ messageApi }) => {
               rowKey="id"
               loading={loading}
               size="small"
-              pagination={{
-                pageSize: 6,
-                showSizeChanger: false,
-                showQuickJumper: true,
-                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} sản phẩm`,
-              }}
+              pagination={false}
               scroll={{ x: 800 }}
             />
           </Card>

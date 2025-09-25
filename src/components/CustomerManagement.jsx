@@ -245,13 +245,7 @@ const CustomerManagement = ({ messageApi }) => {
           rowKey="id"
           loading={loading}
           size="small"
-          pagination={{
-            total: filteredAccounts.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} khách hàng`,
-          }}
+          pagination={false}
           scroll={{ x: 1200 }}
         />
       </Card>

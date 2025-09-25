@@ -285,16 +285,6 @@ const ProductList = ({ messageApi }) => {
     loadData();
   };
 
-  const handleReset = () => {
-    setFilters({
-      code: "",
-      name: "",
-      description: "",
-    });
-    setTimeout(() => {
-      loadData();
-    }, 100);
-  };
 
   const handleSubmit = async values => {
     try {

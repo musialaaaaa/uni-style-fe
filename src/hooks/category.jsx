@@ -41,7 +41,7 @@ const useCategory = () => {
         params: {
           ...cleanParam,
           page: customPageable.page,
-          size: customPageable.size,
+          size: 1000000,
           sort: customPageable.sort.join(","),
         },
       });

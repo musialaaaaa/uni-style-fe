@@ -366,14 +366,7 @@ const MaterialManagement = ({ messageApi }) => {
           dataSource={filteredMaterials}
           rowKey="id"
           loading={loading}
-          pagination={{
-            total: filteredMaterials.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} chất liệu`,
-          }}
+          pagination={false}
           scroll={{ x: 900 }}
           size="small"
           rowClassName={record => (record.is_deleted ? "deleted-row" : "")}

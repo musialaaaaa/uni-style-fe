@@ -41,7 +41,7 @@ const useColor = () => {
         params: {
           ...cleanParam,
           page: customPageable.page,
-          size: customPageable.size,
+          size: 100000,
           sort: customPageable.sort.join(","),
         },
       });

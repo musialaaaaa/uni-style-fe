@@ -39,9 +39,15 @@ const useProductDetail = () => {
         params: {
           ...param,
           ...customParam,
+          size: customParam?.pageSize || pageable.pageSize,
         },
       });
-
+      setPageable({
+        page: response.data.metadata.page,
+        size: response.data.metadata.size,
+        totalPage: response.data.metadata.totalPage,
+        total: response.data.metadata.total,
+      });
       setProductDetails(response.data.data);
       return response.data.data;
     } catch (error) {
@@ -58,14 +64,17 @@ const useProductDetail = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get("/api/v1/product-details", {
+      const response = await api.get("/api/v1/products", {
         params: {
           ...param,
           ...customParam,
+          size: 10000,
+          isShop: true,
         },
       });
-      const productIds = response.data.data.map(pd => pd.product.id);
+      const productIds = response.data.data.data.map(pd => pd.id);
       const uniqueProductIds = [...new Set(productIds)];
+
       const associationResponses = await Promise.all(
         uniqueProductIds.map(id => api.get(`/api/v1/products/${id}/shop`)),
       );
@@ -157,6 +166,7 @@ const useProductDetail = () => {
   }, []);
 
   return {
+    pageable,
     productDetails,
     productDetail,
     productDetailAssociations,

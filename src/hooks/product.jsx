@@ -33,7 +33,6 @@ const useProducts = () => {
         description: "",
         ...customParam,
       };
-
       // Clean empty values from the param object
       const cleanParam = Object.entries(normalizedParam)
         .filter(([_, value]) => value !== "")
@@ -41,6 +40,7 @@ const useProducts = () => {
           acc[key] = value;
           return acc;
         }, {});
+
 
       const response = await api.get("/api/v1/products", {
         params: {

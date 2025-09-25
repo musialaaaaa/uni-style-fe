@@ -45,6 +45,7 @@ const OrderManagement = ({ messageApi }) => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewingOrder, setViewingOrder] = useState(null);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const [form] = Form.useForm();
   const { orders, pageable, loading: loadingOrders, getOrders } = useOrders();
 
@@ -246,11 +247,12 @@ const OrderManagement = ({ messageApi }) => {
           loading={loading}
           pagination={{
             onChange: (page, pageSize) => {
+              setPagination(prev => ({ ...prev, current: page, pageSize }));
               getOrders({}, { ...pageable, page: page - 1, size: pageSize });
             },
-            current: pageable.page + 1,
+            current: pagination.current,
             total: filteredOrders.length,
-            pageSize: pageable.size,
+            pageSize: pagination.pageSize,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>

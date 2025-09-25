@@ -28,6 +28,7 @@ const useAccount = () => {
       const normalizedParam = {
         name: "",
         ...customParam,
+        size: 100000,
       };
 
       // Clean empty values from the param object

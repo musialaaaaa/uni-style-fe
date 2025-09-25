@@ -379,14 +379,7 @@ const VoucherManagement = ({ messageApi }) => {
           dataSource={filteredVouchers}
           rowKey="id"
           loading={loading}
-          pagination={{
-            total: filteredVouchers.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} mục`,
-          }}
+          pagination={false}
           scroll={{ x: 1400 }}
           size="small"
           rowClassName={record => (record.isDeleted ? "deleted-row" : "")}

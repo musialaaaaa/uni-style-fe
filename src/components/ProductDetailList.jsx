@@ -40,6 +40,7 @@ const ProductDetailList = ({ messageApi }) => {
   });
   const navigate = useNavigate();
   const {
+    pageable,
     productDetails,
     getProductDetail,
     loading: loadingProductDetail,
@@ -66,8 +67,6 @@ const ProductDetailList = ({ messageApi }) => {
   const deleteProductApi = async productId => {
     try {
       const res = await deleteProductDetail(productId);
-      console.log(res);
-
       if (res.status === 200) {
         messageApi.success("Xóa sản phẩm thành công!");
       } else {
@@ -81,7 +80,12 @@ const ProductDetailList = ({ messageApi }) => {
   };
 
   const loadData = () => {
-    getProductDetail({ ...filters, ...pagination });
+    getProductDetail({
+      ...filters,
+      ...pagination,
+      size: pagination.pageSize,
+      page: pagination.current - 1,
+    });
   };
 
   const handleAdd = () => {
@@ -379,9 +383,8 @@ const ProductDetailList = ({ messageApi }) => {
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
-            total: pagination.total,
+            total: pageable.total,
             showSizeChanger: true,
-            showQuickJumper: true,
             showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} sản phẩm`,
             pageSizeOptions: ["5", "10", "20", "50"],
             onChange: (page, pageSize) => {

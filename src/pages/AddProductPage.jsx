@@ -80,14 +80,19 @@ const AddProductPage = ({ messageApi }) => {
     try {
       // Simulate API call
       //   await new Promise(resolve => setTimeout(resolve, 1500));
-      const prevImageUrls = productDetail?.images?.filter(file => file.id) || [];
+      const prevImageUrls = values.images?.filter(file => file.id) || [];
+      console.log(values.images);
+
       const resImg =
         values.images?.filter(file => !file.id).length > 0 &&
         (await uploadImages(
           values.images?.filter(file => !file.id).map(file => file.originFileObj) || [],
         ));
 
-      const imageUrls = prevImageUrls.concat(resImg).map(img => img.id); // Lấy URL từ phản hồi
+      const imageUrls = prevImageUrls
+        .concat(resImg)
+        .map(img => img.id)
+        ?.filter(Boolean);
       const payloadProdductDetail = {
         name: values.productName,
         quantity: values.quantity,

@@ -357,14 +357,7 @@ const ColorManagement = ({ messageApi }) => {
           dataSource={filteredColors}
           rowKey="id"
           loading={loading}
-          pagination={{
-            total: filteredColors.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} màu sắc`,
-          }}
+          pagination={false}
           scroll={{ x: 900 }}
           size="small"
           rowClassName={record => (record.is_deleted ? "deleted-row" : "")}
