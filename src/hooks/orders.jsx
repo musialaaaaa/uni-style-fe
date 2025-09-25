@@ -16,7 +16,7 @@ const useOrders = () => {
   const [pageable, setPageable] = useState({
     page: 0,
     size: 10,
-    sort: ["id,asc"],
+    sort: ["id,desc"],
   });
 
   const getOrders = useCallback(async (customParam = param, customPageable = pageable) => {
@@ -43,7 +43,7 @@ const useOrders = () => {
         params: {
           ...cleanParam,
           page: customPageable.page,
-          size: customPageable.size,
+          size: 100000,
           sort: customPageable.sort.join(","),
         },
       });

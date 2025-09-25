@@ -245,19 +245,7 @@ const OrderManagement = ({ messageApi }) => {
           dataSource={filteredOrders}
           rowKey="id"
           loading={loading}
-          pagination={{
-            onChange: (page, pageSize) => {
-              setPagination(prev => ({ ...prev, current: page, pageSize }));
-              getOrders({}, { ...pageable, page: page - 1, size: pageSize });
-            },
-            current: pagination.current,
-            total: filteredOrders.length,
-            pageSize: pagination.pageSize,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `Hiển thị ${range[0]}-${range[1]} trong tổng số ${total} đơn hàng`,
-          }}
+          pagination={false}
           scroll={{ x: 1400 }}
           size="small"
           rowClassName={record => {
