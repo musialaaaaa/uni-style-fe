@@ -172,9 +172,14 @@ const SalesManagement = ({ messageApi }) => {
       if (couponCode.trim()) {
         const res = await getApplyDiscountCode(couponCode);
         if (res?.code === couponCode) {
+                    if (res.usageLimit >= res.used) {
+                      messageApi.warning(`Mã "${res.code}" đã hết lượt sử dụng`);
+                      return;
+                    }
           setAppliedCoupon(res);
           formVoucher.resetFields();
           messageApi.success(`Áp dụng mã "${res.code}" thành công`);
+
         } else {
           messageApi.error("Mã giảm giá không hợp lệ");
         }
